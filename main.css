@@ -1,6 +1,7 @@
 *{
     background-color: black;
     font-family:Arial, Helvetica, sans-serif;
+    touch-action: manipulation;
 }
 
 canvas{
