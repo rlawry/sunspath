@@ -1,0 +1,22 @@
+*{
+    background-color: black;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+canvas{
+    position: absolute;
+    top:0;
+    left:0;
+}
+
+#button{
+    position:absolute;
+    top:60%;
+    left:50%;
+    background-color: blue;
+    color:white;
+    font-size: 2rem;
+    transform: translate(-50%,-50%);
+    caret-color: transparent;
+    cursor: pointer;
+}
