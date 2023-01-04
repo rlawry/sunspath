@@ -9,11 +9,11 @@ function init(){
     drawScreen();
     drawEllipse();
     drawSky();
+    drawEquinoxPath(lat);
     drawPolaris(lat);
     drawBigIncrements();
     drawSmallIncrements();
     drawCompass();
-    drawEquinoxPath(lat);
 }
 
 function drawScreen(){
