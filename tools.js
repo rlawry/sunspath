@@ -7,13 +7,25 @@ function init(){
     c.width = window.innerWidth;
 
     drawScreen();
-    drawEllipse();
+    drawEquinoxPath(lat);
+    eraseUnderside();
+    drawSummerSolstice(lat);
+    drawWinterSolstice(lat);
+    drawGround();
     drawSky();
     drawPolaris(lat);
     drawBigIncrements();
     drawSmallIncrements();
     drawCompass();
-    drawEquinoxPath(lat);
+
+}
+
+function eraseUnderside(){
+    ctx.save();
+    ctx.translate(c.width/2,c.height/2);
+    ctx.fillStyle = "black";
+    ctx.fillRect(0,-200,800,800);
+    ctx.restore();
 }
 
 function drawScreen(){
@@ -21,7 +33,7 @@ function drawScreen(){
     ctx.fillRect(0,0,c.width,c.height);
 }
 
-function drawEllipse(){
+function drawGround(){
     ctx.beginPath();
     ctx.lineWidth = 1;
     ctx.fillStyle = "green";
@@ -40,6 +52,52 @@ function drawEquinoxPath(lat){
     ctx.strokeStyle = "orange";
     ctx.rotate((90-lat)*Math.PI/180);
     ctx.ellipse(0,0,200,40*Math.cos((90-lat)*Math.PI/180),0,2*Math.PI,false);
+    ctx.stroke();
+    ctx.closePath();
+    ctx.restore();
+}
+
+function drawSummerSolstice(lat){
+    let angle=90-lat;
+    let offset = 79.749813785;
+    let newCenter = {
+        x:offset*Math.sin(angle*Math.PI/180),
+        y:-offset*Math.cos(angle*Math.PI/180)
+    };
+    
+    let newDiameter = 200*Math.sin(Math.acos(offset/200));
+    ctx.save();
+    ctx.translate(c.width/2,c.height/2);
+    ctx.translate(newCenter.x,newCenter.y);
+    ctx.beginPath();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "yellow";
+    ctx.rotate((90-lat)*Math.PI/180);
+    ctx.ellipse(0,0,newDiameter,40*Math.cos((90-lat)*Math.PI/180),0,2*Math.PI,false);
+    
+    ctx.stroke();
+    ctx.closePath();
+    ctx.restore();
+}
+
+function drawWinterSolstice(lat){
+    let angle=90-lat;
+    let offset = 79.749813785;
+    let newCenter = {
+        x:-offset*Math.sin(angle*Math.PI/180),
+        y:offset*Math.cos(angle*Math.PI/180)
+    };
+    
+    let newDiameter = 200*Math.sin(Math.acos(offset/200));
+    ctx.save();
+    ctx.translate(c.width/2,c.height/2);
+    ctx.translate(newCenter.x,newCenter.y);
+    ctx.beginPath();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "blue";
+    ctx.rotate((90-lat)*Math.PI/180);
+    ctx.ellipse(0,0,newDiameter,40*Math.cos((90-lat)*Math.PI/180),0,2*Math.PI,false);
+    
     ctx.stroke();
     ctx.closePath();
     ctx.restore();
@@ -70,6 +128,7 @@ function drawPolaris(lat){
 function drawCompass(){
     ctx.save();
     ctx.translate(c.width/2,c.height/2);
+    ctx.lineWidth = 2;
     ctx.font = "20px Arial";
     ctx.fillStyle = "pink";
     ctx.textAlign="center";
