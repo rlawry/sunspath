@@ -13,6 +13,7 @@ function init(){
     drawWinterSolstice(lat);
     drawGround();
     drawSky();
+    drawEquinoxPath(lat);
     drawPolaris(lat);
     drawBigIncrements();
     drawSmallIncrements();
