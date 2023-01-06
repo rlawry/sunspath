@@ -5,20 +5,19 @@ let lat = 50;
 function init(){
     c.height = window.innerHeight;
     c.width = window.innerWidth;
-
+    
     drawScreen();
-    drawEquinoxPath(lat);
-    eraseUnderside();
-    drawSummerSolstice(lat);
-    drawWinterSolstice(lat);
+
     drawGround();
     drawSky();
-    drawEquinoxPath(lat);
     drawPolaris(lat);
     drawBigIncrements();
     drawSmallIncrements();
     drawCompass();
-
+    establishClip();
+    drawEquinoxPath(lat);
+    drawSummerSolstice(lat);
+    drawWinterSolstice(lat);
 }
 
 function eraseUnderside(){
@@ -45,14 +44,31 @@ function drawGround(){
     ctx.closePath();
 }
 
+function establishClip(){
+    //ctx.save();
+    ctx.beginPath();
+    ctx.translate(c.width/2,c.height/2);
+    ctx.arc(0,0,200,0,Math.PI,true);
+    ctx.ellipse(0,0,200,40,0,Math.PI,0,true);
+    ctx.fillStyle="white";
+    ctx.closePath();
+    //ctx.fill();
+    ctx.clip();
+}
+
+function rad(deg){
+    return deg*Math.PI/180;
+}
+
 function drawEquinoxPath(lat){
     ctx.save();
-    ctx.translate(c.width/2,c.height/2);
+    //ctx.translate(c.width/2,c.height/2);
+    let phi = Math.atan(40*(Math.cos(rad(90-lat))/200*Math.tan(rad(90-lat))));
     ctx.beginPath();
     ctx.lineWidth = 1;
     ctx.strokeStyle = "orange";
-    ctx.rotate((90-lat)*Math.PI/180);
-    ctx.ellipse(0,0,200,40*Math.cos((90-lat)*Math.PI/180),0,2*Math.PI,false);
+    ctx.rotate(rad(90-lat));
+    ctx.ellipse(0,0,200,40*Math.cos(rad(90-lat)),0,Math.PI/2-phi,3*Math.PI/2-phi,false);
     ctx.stroke();
     ctx.closePath();
     ctx.restore();
@@ -60,21 +76,22 @@ function drawEquinoxPath(lat){
 
 function drawSummerSolstice(lat){
     let angle=90-lat;
-    let offset = 79.749813785;
+    let offset = 79.749813785;  //tilt of 23.5° gets us this value.
     let newCenter = {
-        x:offset*Math.sin(angle*Math.PI/180),
-        y:-offset*Math.cos(angle*Math.PI/180)
+        x:offset*Math.sin(rad(angle)),
+        y:-offset*Math.cos(rad(angle))
     };
     
     let newDiameter = 200*Math.sin(Math.acos(offset/200));
+    let scale40 = newDiameter/200;
     ctx.save();
-    ctx.translate(c.width/2,c.height/2);
+    //ctx.translate(c.width/2,c.height/2);
     ctx.translate(newCenter.x,newCenter.y);
     ctx.beginPath();
     ctx.lineWidth = 1;
     ctx.strokeStyle = "yellow";
-    ctx.rotate((90-lat)*Math.PI/180);
-    ctx.ellipse(0,0,newDiameter,40*Math.cos((90-lat)*Math.PI/180),0,2*Math.PI,false);
+    ctx.rotate(rad(90-lat));
+    ctx.ellipse(0,0,newDiameter,40*Math.cos(rad(angle))*scale40,0,0,2*Math.PI,false);
     
     ctx.stroke();
     ctx.closePath();
@@ -85,19 +102,19 @@ function drawWinterSolstice(lat){
     let angle=90-lat;
     let offset = 79.749813785;
     let newCenter = {
-        x:-offset*Math.sin(angle*Math.PI/180),
-        y:offset*Math.cos(angle*Math.PI/180)
+        x:-offset*Math.sin(rad(angle)),
+        y:offset*Math.cos(rad(angle))
     };
     
     let newDiameter = 200*Math.sin(Math.acos(offset/200));
     ctx.save();
-    ctx.translate(c.width/2,c.height/2);
+    //ctx.translate(c.width/2,c.height/2);
     ctx.translate(newCenter.x,newCenter.y);
     ctx.beginPath();
     ctx.lineWidth = 1;
     ctx.strokeStyle = "blue";
-    ctx.rotate((90-lat)*Math.PI/180);
-    ctx.ellipse(0,0,newDiameter,40*Math.cos((90-lat)*Math.PI/180),0,2*Math.PI,false);
+    ctx.rotate(rad(angle));
+    ctx.ellipse(0,0,newDiameter,40*Math.cos(rad(angle))*scale40,0,0,2*Math.PI,false);
     
     ctx.stroke();
     ctx.closePath();
