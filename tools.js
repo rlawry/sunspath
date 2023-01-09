@@ -84,6 +84,13 @@ function drawSummerSolstice(lat){
     
     let newDiameter = 200*Math.sin(Math.acos(offset/200));
     let scale40 = newDiameter/200;
+    let newOffset = offset/Math.tan(rad(lat));
+    console.log(newOffset + " new offset - original was " + offset); 
+    let phi = Math.atan(40*(Math.cos(rad(90-lat))/200*Math.tan(rad(90-lat))));
+    let thing = 40*(Math.abs((-1/(200**2)*(newOffset**2+1)))**0.5);
+    console.log(thing+" thing");
+    let poosh = Math.atan(thing/newOffset)*180/Math.PI;
+    console.log(poosh + " poosh");
     ctx.save();
     //ctx.translate(c.width/2,c.height/2);
     ctx.translate(newCenter.x,newCenter.y);
@@ -91,7 +98,7 @@ function drawSummerSolstice(lat){
     ctx.lineWidth = 1;
     ctx.strokeStyle = "yellow";
     ctx.rotate(rad(90-lat));
-    ctx.ellipse(0,0,newDiameter,40*Math.cos(rad(angle))*scale40,0,0,2*Math.PI,false);
+    ctx.ellipse(0,0,newDiameter,40*Math.cos(rad(angle))*scale40,0,Math.PI/2-rad(39),3*Math.PI/2+rad(25),false);
     
     ctx.stroke();
     ctx.closePath();
@@ -107,6 +114,7 @@ function drawWinterSolstice(lat){
     };
     
     let newDiameter = 200*Math.sin(Math.acos(offset/200));
+    let scale40 = newDiameter/200;
     ctx.save();
     //ctx.translate(c.width/2,c.height/2);
     ctx.translate(newCenter.x,newCenter.y);
