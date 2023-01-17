@@ -3,6 +3,22 @@ const ctx = c.getContext("2d");
 let lat = -10;
 var fudge = 0;
 
+var game1 = {
+    latitude: 43.6,
+    1: {
+        question: "Which path is the Equinox path?",
+        answer: "yellow"
+    },
+    2:{
+        question: "Which path is the Summer Solstice path?",
+        answer: "red"
+    },
+    3:{
+        question: "Which path is the Winter Solstice path?",
+        answer: "blue"
+    }
+}
+
 var latitudes = [
     "Equator",
     "Tropic of Cancer",
@@ -34,12 +50,18 @@ var colors = [
     "blue",
     "yellow",
     "red"
-]
+];
+
+function loadGame(num){
+    document.getElementById("question").innerHTML = game1[num]["question"];
+    lat = game1["latitude"];
+    loadButtons(colors);
+}
 
 function init(){
     c.height = window.innerHeight;
     c.width = window.innerWidth;
-    
+    loadGame(1);
     drawScreen();
 
     drawGround();
@@ -108,8 +130,18 @@ function drawCompass(){
     ctx.fillStyle = "pink";
     ctx.textAlign="center";
     ctx.textBaseline="middle";
-    ctx.fillText("N",300,0);
-    ctx.fillText("S",-300,0);
+    if(lat==90){
+        ctx.fillText("S",300,0);
+        ctx.fillText("S",-300,0);
+    }
+    else if(lat==-90){
+        ctx.fillText("N",300,0);
+        ctx.fillText("N",-300,0);
+    }
+    else {
+        ctx.fillText("N",300,0);
+        ctx.fillText("S",-300,0);
+    }
     ctx.strokeStyle="pink";
     ctx.moveTo(200,0);
     ctx.lineTo(-200,0);
@@ -351,10 +383,22 @@ function animate(){
     requestAnimationFrame(animate); 
 }
 
-function loadButtons(){
-    document.getElementById("option1").innerHTML = colors[0];
-    document.getElementById("option2").innerHTML = colors[1];
-    document.getElementById("option3").innerHTML = colors[2];
+function loadButtons(args){
+    document.getElementById("option1").innerHTML = args[0];
+    document.getElementById("option2").innerHTML = args[1];
+    document.getElementById("option3").innerHTML = args[2];
 }
-loadButtons();
-animate();
+
+let questionCorrect = false;
+
+function check(e){
+    let answer = game1["1"]["answer"];
+    console.log(answer + " answer");
+    console.log(e.innerHTML + " e");
+    if(e.innerHTML == answer){document.getElementById("option1").style.background = "green"; questionCorrect = true;}
+    else {document.getElementById("option1").style.background = "red";}
+    if(questionCorrect){loadGame(2); questionCorrect=false;}
+}
+
+loadButtons(colors);
+//animate();

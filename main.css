@@ -23,7 +23,7 @@ canvas{
 .button-panel{
     user-select: none;
     position: absolute;
-    top:60%;
+    top:65%;
     left:50%;
     transform: translate(-50%,-50%);
     display: flex;
@@ -33,7 +33,7 @@ canvas{
 .question{
     color: white;
     position: absolute;
-    top: 55%;
+    top: 60%;
     left:50%;
     transform: translate(-50%,-50%);
 }
