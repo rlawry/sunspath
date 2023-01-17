@@ -53,7 +53,7 @@ function establishClip(){
     ctx.fillStyle="white";
     ctx.closePath();
     //ctx.fill();
-    ctx.clip();
+    //ctx.clip();
 }
 
 function rad(deg){
@@ -84,13 +84,25 @@ function drawSummerSolstice(lat){
     
     let newDiameter = 200*Math.sin(Math.acos(offset/200));
     let scale40 = newDiameter/200;
-    let newOffset = offset/Math.tan(rad(lat));
-    console.log(newOffset + " new offset - original was " + offset); 
+    let new40 = scale40*40;
+
     let phi = Math.atan(40*(Math.cos(rad(90-lat))/200*Math.tan(rad(90-lat))));
-    let thing = 40*(Math.abs((-1/(200**2)*(newOffset**2+1)))**0.5);
-    console.log(thing+" thing");
-    let poosh = Math.atan(thing/newOffset)*180/Math.PI;
-    console.log(poosh + " poosh");
+    let newPhi = Math.atan(new40/newDiameter*Math.tan(Math.acos(offset*Math.tan(rad(lat)/newDiameter))));
+    let ex = offset*Math.tan(rad(lat));
+    console.log(ex + " x value");
+    let circlePhi = Math.acos(ex/newDiameter);
+    console.log(deg(circlePhi) + " deg(circlePhi)");
+    // let why = new40*Math.sin(circlePhi);
+    // console.log(why + " y value");
+    if(ex >= newDiameter){
+        circlePhi = 0;
+        phi = 0;
+    }
+    let startAngle = deg(circlePhi-phi);
+    let endAngle = deg(2*Math.PI-circlePhi-phi);
+    console.log(startAngle + " startAngle and " + endAngle + " endAngle");
+    // let testAngle = Math.atan(why/ex);
+    // console.log(testAngle + " rad test angle and " + deg(testAngle) + "deg test angle");
     ctx.save();
     //ctx.translate(c.width/2,c.height/2);
     ctx.translate(newCenter.x,newCenter.y);
@@ -98,11 +110,15 @@ function drawSummerSolstice(lat){
     ctx.lineWidth = 1;
     ctx.strokeStyle = "yellow";
     ctx.rotate(rad(90-lat));
-    ctx.ellipse(0,0,newDiameter,40*Math.cos(rad(angle))*scale40,0,Math.PI/2-rad(39),3*Math.PI/2+rad(25),false);
+    ctx.ellipse(0,0,newDiameter,40*Math.cos(rad(angle))*scale40,0,rad(startAngle),rad(endAngle),false);
     
     ctx.stroke();
     ctx.closePath();
     ctx.restore();
+}
+
+function deg(theta){
+    return theta*180/Math.PI;
 }
 
 function drawWinterSolstice(lat){
@@ -112,17 +128,36 @@ function drawWinterSolstice(lat){
         x:-offset*Math.sin(rad(angle)),
         y:offset*Math.cos(rad(angle))
     };
-    
     let newDiameter = 200*Math.sin(Math.acos(offset/200));
     let scale40 = newDiameter/200;
+
+    //let new40 = scale40*40;
+
+    let phi = Math.atan(40*(Math.cos(rad(90-lat))/200*Math.tan(rad(90-lat))));
+    //let newPhi = Math.atan(new40/newDiameter*Math.tan(Math.acos(offset*Math.tan(rad(lat)/newDiameter))));
+    let ex = -1*offset*Math.tan(rad(lat));
+    console.log(ex + " x value");
+    let circlePhi = Math.acos(ex/newDiameter);
+    console.log(deg(circlePhi) + " deg(circlePhi)");
+    // let why = new40*Math.sin(circlePhi);
+    // console.log(why + " y value");
+    if(ex >= newDiameter){
+        circlePhi = 0;
+        phi = 0;
+    }
+    let startAngle = deg(circlePhi-phi);
+    let endAngle = deg(2*Math.PI-circlePhi-phi);
+    console.log(startAngle + " startAngle and " + endAngle + " endAngle");
+    // let testAngle = Math.atan(why/ex);
+    // console.log(testAngle + " rad test angle and " + deg(testAngle) + "deg test angle");
     ctx.save();
     //ctx.translate(c.width/2,c.height/2);
     ctx.translate(newCenter.x,newCenter.y);
     ctx.beginPath();
     ctx.lineWidth = 1;
     ctx.strokeStyle = "blue";
-    ctx.rotate(rad(angle));
-    ctx.ellipse(0,0,newDiameter,40*Math.cos(rad(angle))*scale40,0,0,2*Math.PI,false);
+    ctx.rotate(rad(90-lat));
+    ctx.ellipse(0,0,newDiameter,40*Math.cos(rad(angle))*scale40,0,rad(startAngle),rad(endAngle),false);
     
     ctx.stroke();
     ctx.closePath();
@@ -233,3 +268,18 @@ function makeNew(){
     lat = Math.floor(Math.random()*90);
     init();
 }
+var up = true;
+function animate(){
+    if(up){
+        if(lat<90){lat+=1;}
+        else {lat=90; up=false;}
+    }
+    else if(!up){
+        if(lat>0){lat-=1;}
+        else{lat = 0; up=true;}
+    }
+    init();
+    requestAnimationFrame(animate); 
+}
+
+animate();
