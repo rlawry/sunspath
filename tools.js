@@ -1,6 +1,40 @@
 const c = document.getElementById("canvas");
 const ctx = c.getContext("2d");
 let lat = 50;
+var fudge = 0;
+
+var latitudes = [
+    "Equator",
+    "Tropic of Cancer",
+    "Tropic of Capricorn"
+];
+
+var months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+];
+
+var specialDays = [
+    "Equinox",
+    "Summer Solstice",
+    "Winter Solstice"
+];
+
+var colors = [
+    "blue",
+    "yellow",
+    "red"
+]
 
 function init(){
     c.height = window.innerHeight;
@@ -66,7 +100,7 @@ function drawEquinoxPath(lat){
     let phi = Math.atan(40*(Math.cos(rad(90-lat))/200*Math.tan(rad(90-lat))));
     ctx.beginPath();
     ctx.lineWidth = 1;
-    ctx.strokeStyle = "orange";
+    ctx.strokeStyle = colors[1];
     ctx.rotate(rad(90-lat));
     ctx.ellipse(0,0,200,40*Math.cos(rad(90-lat)),0,Math.PI/2-phi,3*Math.PI/2-phi,false);
     ctx.stroke();
@@ -98,8 +132,8 @@ function drawSummerSolstice(lat){
         circlePhi = 0;
         phi = 0;
     }
-    let startAngle = deg(circlePhi-phi);
-    let endAngle = deg(2*Math.PI-circlePhi-phi);
+    let startAngle = deg(circlePhi-phi)-fudge;
+    let endAngle = deg(2*Math.PI-circlePhi-phi)-fudge;
     console.log(startAngle + " startAngle and " + endAngle + " endAngle");
     // let testAngle = Math.atan(why/ex);
     // console.log(testAngle + " rad test angle and " + deg(testAngle) + "deg test angle");
@@ -108,7 +142,7 @@ function drawSummerSolstice(lat){
     ctx.translate(newCenter.x,newCenter.y);
     ctx.beginPath();
     ctx.lineWidth = 1;
-    ctx.strokeStyle = "yellow";
+    ctx.strokeStyle = colors[2];
     ctx.rotate(rad(90-lat));
     ctx.ellipse(0,0,newDiameter,40*Math.cos(rad(angle))*scale40,0,rad(startAngle),rad(endAngle),false);
     
@@ -155,7 +189,7 @@ function drawWinterSolstice(lat){
     ctx.translate(newCenter.x,newCenter.y);
     ctx.beginPath();
     ctx.lineWidth = 1;
-    ctx.strokeStyle = "blue";
+    ctx.strokeStyle = colors[0];
     ctx.rotate(rad(90-lat));
     ctx.ellipse(0,0,newDiameter,40*Math.cos(rad(angle))*scale40,0,rad(startAngle),rad(endAngle),false);
     
@@ -282,4 +316,10 @@ function animate(){
     requestAnimationFrame(animate); 
 }
 
+function loadButtons(){
+    document.getElementById("option1").innerHTML = colors[0];
+    document.getElementById("option2").innerHTML = colors[1];
+    document.getElementById("option3").innerHTML = colors[2];
+}
+loadButtons();
 animate();

@@ -10,14 +10,30 @@ canvas{
     left:0;
 }
 
-#button{
-    position:absolute;
-    top:60%;
-    left:50%;
+.button{
     background-color: blue;
     color:white;
     font-size: 2rem;
-    transform: translate(-50%,-50%);
     caret-color: transparent;
+    width: auto;
+    margin: 10px;
     cursor: pointer;
+}
+
+.button-panel{
+    user-select: none;
+    position: absolute;
+    top:60%;
+    left:50%;
+    transform: translate(-50%,-50%);
+    display: flex;
+    flex-direction: row;
+}
+
+.question{
+    color: white;
+    position: absolute;
+    top: 55%;
+    left:50%;
+    transform: translate(-50%,-50%);
 }
