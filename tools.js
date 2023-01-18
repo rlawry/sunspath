@@ -2,7 +2,10 @@ const c = document.getElementById("canvas");
 const ctx = c.getContext("2d");
 let lat = -10;
 var fudge = 0;
-var gameNum = 1;
+
+var gameNum = 3;
+var tries = 0;
+
 
 var gameList = ["game1","game2"];
 
@@ -29,6 +32,13 @@ var game2 = {
     question: "In which hemisphere is the observer?  Watch the sun's path over the course of a year.",
     score: 0,
     passing: 10,
+    complete: false
+}
+
+var game3 = {
+    question: "Solstice or Equinox?",
+    passing: 5,
+    score:4,
     complete: false
 }
 
@@ -70,18 +80,24 @@ var hemispheres = [
     "Southern",
     "Neither"
 ]
-
+let previousOffset = 0;
+let path = 0;
+var date;
 function loadGame(){
     if(gameNum==1){
         document.getElementById("question").innerHTML = game1[gameNum]["question"];
         lat = game1["latitude"];
         loadButtons(colors);
+        drawScreen();
+        drawDiagram(true);
+        drawEquinoxPath();
+        drawSummerSolstice();
+        drawWinterSolstice();
     }
-    if(gameNum==2){
+    else if(gameNum==2){
         document.getElementById("question").innerHTML = game2["question"];
         loadButtons(hemispheres);
-        let sign = Math.random() < 0.5 ? -1 : 1;
-        lat = Math.floor(Math.random()*90) * sign;
+        generateRandomLat();
         drawScreen();
         drawDiagram(false);
         let path = Math.floor(Math.random()*3)+1;
@@ -91,17 +107,36 @@ function loadGame(){
         else if(path==3){drawEquinoxPath();}
         animate();
     }
+    else if(gameNum==3){
+        document.getElementById("question").innerHTML = game3["question"];
+        loadButtons(specialDays);
+        lat = 43.6;
+        drawScreen();
+        drawDiagram(true);
+        while(previousOffset == path){
+            path = Math.sin((Math.floor(Math.random()*3)+1)*Math.PI/2)*offsetRange;
+        }
+        if(path<1&&path>-1){path=0;}
+        previousOffset = path;
+        console.log(path + " path");
+        drawDayBasedOnOffset(path);
+    }
+    else if(gameNum==4){
+        document.getElementById("question").innerHTML = "You did it!";
+        date = new Date();
+        animateAll();
+    }
+}
+
+function generateRandomLat(){
+    let sign = Math.random() < 0.5 ? -1 : 1;
+    lat = Math.floor(Math.random()*90) * sign;
 }
 
 function init(){
     c.height = window.innerHeight;
     c.width = window.innerWidth;
     loadGame();
-    drawScreen();
-    drawDiagram(true);
-    drawEquinoxPath();
-    drawSummerSolstice();
-    drawWinterSolstice();
 }
 
 function drawDiagram(polaris){
@@ -151,8 +186,39 @@ function drawPolaris(){
     ctx.rotate(-1*lat*Math.PI/180);
     ctx.lineTo(300,0);
     ctx.stroke();
-    ctx.restore();
     ctx.setLineDash([]);
+    drawStar(300,0,5,10,3);
+    ctx.restore();
+}
+
+function drawStar(cx, cy, spikes, outerRadius, innerRadius) {
+    var rot = Math.PI / 2 * 3;
+    var x = cx;
+    var y = cy;
+    var step = Math.PI / spikes;
+
+    ctx.strokeSyle = "#000";
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - outerRadius)
+    for (i = 0; i < spikes; i++) {
+        x = cx + Math.cos(rot) * outerRadius;
+        y = cy + Math.sin(rot) * outerRadius;
+        ctx.lineTo(x, y)
+        rot += step
+
+        x = cx + Math.cos(rot) * innerRadius;
+        y = cy + Math.sin(rot) * innerRadius;
+        ctx.lineTo(x, y)
+        rot += step
+    }
+    ctx.lineTo(cx, cy - outerRadius)
+    ctx.closePath();
+    ctx.lineWidth=2;
+    ctx.strokeStyle='yellow';
+    ctx.stroke();
+    ctx.fillStyle='white';
+    ctx.fill();
+
 }
 
 function drawCompass(){
@@ -402,6 +468,7 @@ function makeNew(){
     lat = Math.floor(Math.random()*90);
     init();
 }
+
 var up = true;
 var offsetRange = 79.749813785;
 var currentOffset = 0;
@@ -416,6 +483,40 @@ function animate(){
     requestAnimationFrame(animate); 
 }
 
+function stopAnimation() {
+    window.cancelAnimationFrame(animate);
+}
+let colorIndex = 0;
+
+function animateAll(){
+    date = new Date();
+    if(up){
+        lat+=1;
+        if(lat>=90){up=false;}
+    }
+    else if(!up){
+        lat-=1;
+        if(lat<=-90){up=true;}
+    }
+
+    drawScreen();
+    drawDiagram(true);
+    drawEquinoxPath();
+    if(date%1000 == 0){blinkColors()};
+    if(lat>-90){drawSummerSolstice();}
+    if(lat<90){drawWinterSolstice();}
+    requestAnimationFrame(animateAll); 
+}
+
+function blinkColors(){
+    document.getElementById("option1").style = colors[colorIndex-1];
+    document.getElementById("option2").style = colors[colorIndex-1];
+    document.getElementById("option3").style = colors[colorIndex-1];
+    colorIndex++;
+    console.log(colorIndex + " color index");
+    if(colorIndex>colors.length){colorIndex=0;}
+}
+
 function loadButtons(args){
     document.getElementById("option1").innerHTML = args[0];
     document.getElementById("option1").style = "blue";
@@ -428,6 +529,7 @@ function loadButtons(args){
 let questionCorrect = false;
 
 function check(e){
+    tries++;
     console.log(e.innerHTML);
     if(gameNum == 1){
         if(!game1["complete"]){
@@ -437,7 +539,14 @@ function check(e){
                 game1["currentQuestion"]+=1;
                 if(game1["currentQuestion"]>game1["totalQuestions"]){
                     game1["complete"]==true;
-                    gameNum++;
+                    if(tries<=3){
+                        gameNum++;
+                        tries=0;
+                    }
+                    else{
+                        gameNum = 1;
+                        document.getElementById("question").innerHTML = "You didn't ace this one.  Try again."
+                    }
                     setTimeout(loadGame,2000);
                 }
                 else {
@@ -457,25 +566,54 @@ function check(e){
         }
     }
     else if(gameNum==2){
-        if(game2["score"]<game2["passing"]){
-            if(lat<0 && e.innerHTML == "Southern"){
-                game2["score"]++;
-                e.style.background = "green";
-                setTimeout(bumpQuestion,2000);
-            }
-            else if(lat>0 && e.innerHTML == "Northern"){
-                game2["score"]++;
-                e.style.background = "green";
-                setTimeout(bumpQuestion,2000);
-            }
-            else if(lat==0 && e.innerHTML == "Neither"){
-                game2["score"]++;
-                e.style.background = "green";
-                setTimeout(bumpQuestion,2000);
+        if(lat<0 && e.innerHTML == "Southern"){
+            if(tries==1){game2["score"]++;}
+            e.style.background = "green";
+            if(game2["score"]>=game2["passing"]){
+                gameNum++;
+                setTimeout(loadGame(),2000);
             }
             else{
-                e.style.background = "red";
+                setTimeout(bumpQuestion,2000);
             }
+        }
+        else if(lat>0 && e.innerHTML == "Northern"){
+            if(tries==1){game2["score"]++;}
+            e.style.background = "green";
+            setTimeout(bumpQuestion,2000);
+        }
+        else if(lat==0 && e.innerHTML == "Neither"){
+            if(tries==1){game2["score"]++;}
+            e.style.background = "green";
+            setTimeout(bumpQuestion,2000);
+        }
+        else{
+            e.style.background = "red";
+        }
+    }
+    else if(gameNum==3){
+        if(path>0&&e.innerHTML=="Winter Solstice"){
+            if(tries==1){game3["score"]++;}
+            e.style.background = "green";
+            setTimeout(bumpQuestion,2000);
+        }
+        else if(path<0&&e.innerHTML == "Summer Solstice"){
+            if(tries==1){game3["score"]++;}
+            e.style.background = "green";
+            setTimeout(bumpQuestion,2000);
+        }
+        else if(path==0&&e.innerHTML == "Equinox"){
+            if(tries==1){game3["score"]++;}
+            e.style.background = "green";
+            setTimeout(bumpQuestion,2000);
+        }
+        else{
+            e.style.background = "red";
+        }
+        console.log(game3["score"] + " score");
+        if(game3["score"]==game3["passing"]){
+            gameNum++;
+            setTimeout(loadGame,2000);
         }
     }
 }
@@ -487,16 +625,26 @@ function bumpQuestion(){
     }
     else if(gameNum==2){
         loadButtons(hemispheres);
-        let sign = Math.random() < 0.5 ? -1 : 1;
-        lat = Math.floor(Math.random()*90) * sign;
+        generateRandomLat();
         drawScreen();
         drawDiagram(false);
-        let path = Math.floor(Math.random()*3)+1;
-        console.log(path + " path");
-        if(path == 1){drawSummerSolstice();}
-        else if(path == 2){drawWinterSolstice();}
-        else if(path==3){drawEquinoxPath();}
     }
+    else if(gameNum==3){
+        loadButtons(specialDays);
+        drawScreen();
+        drawDiagram(true);
+        loadButtons(specialDays);
+        drawScreen();
+        drawDiagram(true);
+        while(previousOffset == path){
+            path = Math.sin((Math.floor(Math.random()*3)+1)*Math.PI/2)*offsetRange;
+            console.log(path + " path");
+        }
+        if(path<1&&path>-1){path=0;}
+        previousOffset = path;
+        drawDayBasedOnOffset(path);
+    }
+    tries=0;
 }
 
 loadButtons(colors);
