@@ -3,7 +3,7 @@ const ctx = c.getContext("2d");
 let lat = -10;
 var fudge = 0;
 
-var gameNum = 3;
+var gameNum = 2;
 var tries = 0;
 
 
@@ -30,8 +30,8 @@ var game1 = {
 
 var game2 = {
     question: "In which hemisphere is the observer?  Watch the sun's path over the course of a year.",
-    score: 0,
-    passing: 10,
+    score: 5,
+    passing: 6,
     complete: false
 }
 
@@ -487,9 +487,9 @@ function stopAnimation() {
     window.cancelAnimationFrame(animate);
 }
 let colorIndex = 0;
+var last = 0;
+function animateAll(now){
 
-function animateAll(){
-    date = new Date();
     if(up){
         lat+=1;
         if(lat>=90){up=false;}
@@ -499,31 +499,37 @@ function animateAll(){
         if(lat<=-90){up=true;}
     }
 
+    if(!last || now-last>1000){
+        last = now;
+        blinkColors();
+    }
+
     drawScreen();
     drawDiagram(true);
     drawEquinoxPath();
-    if(date%1000 == 0){blinkColors()};
     if(lat>-90){drawSummerSolstice();}
     if(lat<90){drawWinterSolstice();}
     requestAnimationFrame(animateAll); 
 }
 
 function blinkColors(){
-    document.getElementById("option1").style = colors[colorIndex-1];
-    document.getElementById("option2").style = colors[colorIndex-1];
-    document.getElementById("option3").style = colors[colorIndex-1];
-    colorIndex++;
+    //console.log(colors[colorIndex]);
     console.log(colorIndex + " color index");
-    if(colorIndex>colors.length){colorIndex=0;}
+    document.getElementById("option1").style.background = colors[colorIndex];
+    document.getElementById("option2").style.background = colors[colorIndex];
+    document.getElementById("option3").style.background = colors[colorIndex];
+    colorIndex++;
+    //console.log(colorIndex + " color index");
+    if(colorIndex==colors.length){colorIndex=0;}
 }
 
 function loadButtons(args){
     document.getElementById("option1").innerHTML = args[0];
-    document.getElementById("option1").style = "blue";
+    document.getElementById("option1").style.background = "blue";
     document.getElementById("option2").innerHTML = args[1];
-    document.getElementById("option2").style = "blue";
+    document.getElementById("option2").style.background = "blue";
     document.getElementById("option3").innerHTML = args[2];
-    document.getElementById("option3").style = "blue";
+    document.getElementById("option3").style.background = "blue";
 }
 
 let questionCorrect = false;
@@ -572,6 +578,7 @@ function check(e){
             if(game2["score"]>=game2["passing"]){
                 gameNum++;
                 setTimeout(loadGame(),2000);
+                stopAnimation();
             }
             else{
                 setTimeout(bumpQuestion,2000);
