@@ -23,6 +23,17 @@ canvas{
     z-index: 2;
 }
 
+.month{
+    position:absolute;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.5rem;
+    color: white;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    z-index: 3;
+}
+
 .game-panel{
     position: absolute;
     top: 65%;
@@ -37,12 +48,12 @@ canvas{
 
 .question{
     color: white;
-    position: relative;
+    margin-bottom: 5%;
     font-size: 1.5rem;
     top: 60%;
     left:50%;
     text-align: center;
-    transform: translate(-50%,-50%);
+    
 }
 
 .button-panel{

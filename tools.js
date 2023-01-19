@@ -3,7 +3,9 @@ const ctx = c.getContext("2d");
 let lat = -10;
 var fudge = 0;
 
-var gameNum = 1;
+var moveOnDelay = 800;
+
+var gameNum = 4;
 var tries = 0;
 
 
@@ -42,11 +44,28 @@ var game3 = {
     complete: false
 }
 
-var latitudes = [
+var game4 = {
+    question: "What is the latitude of the observer?",
+    passing: 5,
+    score: 0,
+    complete: false
+}
+
+var directRays = [
     "Equator",
     "Tropic of Cancer",
     "Tropic of Capricorn"
 ];
+
+var latitudes = [
+    23.5,
+    -23.5,
+    0,
+    66.5,
+    -66.5,
+    90,
+    -90
+]
 
 var months = [
     "January",
@@ -122,10 +141,65 @@ function loadGame(){
         drawDayBasedOnOffset(path);
     }
     else if(gameNum==4){
+        generateUnrandomLat();
+        let list = loadThreeLatitudes();
+        loadButtons(List);
+        drawScreen();
+        drawDiagram(true);
+        if(lat>0){
+            drawSummerSolstice();
+            document.getElementById("month").innerHTML = "June";
+        }
+        if(lat<0){
+            drawWinterSolstice();
+            document.getElementById("month").innerHTML = "December";
+        }
+        if(lat==0){
+            drawEquinoxPath();
+            document.getElementById("month").innerHTML = "March/September";
+        }
+
+    }
+    else if(gameNum==5){
         document.getElementById("question").innerHTML = "You did it!";
         date = new Date();
         animateAll();
     }
+}
+
+var threeLatitudesList = [0,0,0];
+var stringLat;
+
+function loadThreeList(){
+    let randomListAnswer = Math.floor(Math.random()*3);
+    let selection = latitudes[Math.floor(Math.random()*latitudes.length)];
+
+    while(lat!=selection){
+
+    }
+    for(var i = 0; i<threeLatitudesList.length; i++){
+        if(i==randomListAnswer){
+            threeLatitudesList[randomListAnswer] = latToString(lat);
+        }
+        else {
+            latitudes[1];
+        }
+    }
+    
+}
+
+function latToString(val){
+    if(val>0){
+        return `${val}°N`;
+    }
+    else if(val<0){
+        return `${Math.abs(val)}°S`;
+    }
+    else {return val;}
+}
+
+function generateUnrandomLat(){
+    lat = latitudes[Math.floor(Math.random()*latitudes.length)];
 }
 
 function generateRandomLat(){
@@ -480,12 +554,21 @@ function loop1(){
     animate();
 }
 
+var monthInterval = 2*Math.PI/12;
+var indexNow = 0;
+var previousIndex = indexNow;
 function animate(){
     if (!otherRequestId) {
         otherRequestId = window.requestAnimationFrame(loop1);
      }
-    currentOffset=Math.sin(step)*offsetRange;
+    currentOffset=Math.sin(step+Math.PI/2)*offsetRange;
     step+=rad(0.5);
+    if(step>=2*Math.PI){step=0};
+    indexNow = Math.floor((step)/monthInterval);
+    if(indexNow!=previousIndex){
+        plopMonth(Math.floor(step/monthInterval));
+        previousIndex = indexNow;
+    }
     drawScreen();
     drawDiagram(false);
     drawDayBasedOnOffset(currentOffset);
@@ -531,6 +614,11 @@ function loop(now) {
     animateAll();
 }
 
+function plopMonth(index){
+    console.log(months[index]);
+    document.getElementById("month").innerHTML = months[index];
+}
+
 function animateAll() {
     if (!requestId) {
        requestId = requestAnimationFrame(loop);
@@ -550,7 +638,7 @@ function stop() {
 
 function blinkColors(){
     //console.log(colors[colorIndex]);
-    console.log(colorIndex + " color index");
+    //console.log(colorIndex + " color index");
     document.getElementById("option1").style.background = colors[colorIndex];
     document.getElementById("option2").style.background = colors[colorIndex];
     document.getElementById("option3").style.background = colors[colorIndex];
@@ -589,10 +677,10 @@ function check(e){
                         gameNum = 1;
                         document.getElementById("question").innerHTML = "You didn't ace this one.  Try again."
                     }
-                    setTimeout(loadGame,2000);
+                    setTimeout(loadGame,moveOnDelay);
                 }
                 else {
-                    setTimeout(bumpQuestion,2000);
+                    setTimeout(bumpQuestion,moveOnDelay);
                 }
                 console.log("right");
 
@@ -615,10 +703,10 @@ function check(e){
                 gameNum++;
                 console.log("thegameprogressed");
                 stopOther();
-                setTimeout(loadGame,2000);
+                setTimeout(loadGame,moveOnDelay);
             }
             else{
-                setTimeout(bumpQuestion,2000);
+                setTimeout(bumpQuestion,moveOnDelay);
             }
         }
         else if(lat>0 && e.innerHTML == "Northern"){
@@ -628,9 +716,9 @@ function check(e){
                 gameNum++;
                 console.log("thegameprogressed");
                 stopOther();
-                setTimeout(loadGame,2000);
+                setTimeout(loadGame,moveOnDelay);
             }
-            setTimeout(bumpQuestion,2000);
+            setTimeout(bumpQuestion,moveOnDelay);
         }
         else if(lat==0 && e.innerHTML == "Neither"){
             if(tries==1){game2["score"]++;}
@@ -639,9 +727,9 @@ function check(e){
                 gameNum++;
                 console.log("thegameprogressed");
                 stopOther();
-                setTimeout(loadGame,2000);
+                setTimeout(loadGame,moveOnDelay);
             }
-            setTimeout(bumpQuestion,2000);
+            setTimeout(bumpQuestion,moveOnDelay);
         }
         else{
             e.style.background = "red";
@@ -651,17 +739,17 @@ function check(e){
         if(path>0&&e.innerHTML=="Winter Solstice"){
             if(tries==1){game3["score"]++;}
             e.style.background = "green";
-            setTimeout(bumpQuestion,2000);
+            setTimeout(bumpQuestion,moveOnDelay);
         }
         else if(path<0&&e.innerHTML == "Summer Solstice"){
             if(tries==1){game3["score"]++;}
             e.style.background = "green";
-            setTimeout(bumpQuestion,2000);
+            setTimeout(bumpQuestion,moveOnDelay);
         }
         else if(path==0&&e.innerHTML == "Equinox"){
             if(tries==1){game3["score"]++;}
             e.style.background = "green";
-            setTimeout(bumpQuestion,2000);
+            setTimeout(bumpQuestion,moveOnDelay);
         }
         else{
             e.style.background = "red";
@@ -669,7 +757,7 @@ function check(e){
         console.log(game3["score"] + " score");
         if(game3["score"]==game3["passing"]){
             gameNum++;
-            setTimeout(loadGame,2000);
+            setTimeout(loadGame,moveOnDelay);
         }
     }
 }
@@ -689,12 +777,10 @@ function bumpQuestion(){
         loadButtons(specialDays);
         drawScreen();
         drawDiagram(true);
-        loadButtons(specialDays);
-        drawScreen();
-        drawDiagram(true);
+        console.log(previousOffset + " previous");
         while(previousOffset == path){
             path = Math.sin((Math.floor(Math.random()*3)+1)*Math.PI/2)*offsetRange;
-            console.log(path + " path");
+            console.log(path + " current path");
         }
         if(path<1&&path>-1){path=0;}
         previousOffset = path;
