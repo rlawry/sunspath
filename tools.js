@@ -3,7 +3,7 @@ const ctx = c.getContext("2d");
 let lat = -10;
 var fudge = 0;
 
-var gameNum = 2;
+var gameNum = 1;
 var tries = 0;
 
 
@@ -30,15 +30,15 @@ var game1 = {
 
 var game2 = {
     question: "In which hemisphere is the observer?  Watch the sun's path over the course of a year.",
-    score: 5,
+    score: 0,
     passing: 6,
     complete: false
 }
 
 var game3 = {
-    question: "Solstice or Equinox?",
+    question: "Which path is shown?",
     passing: 5,
-    score:4,
+    score:0,
     complete: false
 }
 
@@ -473,22 +473,40 @@ var up = true;
 var offsetRange = 79.749813785;
 var currentOffset = 0;
 var step = 0;
+var otherRequestId;
+
+function loop1(){
+    otherRequestId = undefined;
+    animate();
+}
+
 function animate(){
-    
+    if (!otherRequestId) {
+        otherRequestId = window.requestAnimationFrame(loop1);
+     }
     currentOffset=Math.sin(step)*offsetRange;
     step+=rad(0.5);
     drawScreen();
     drawDiagram(false);
     drawDayBasedOnOffset(currentOffset);
-    requestAnimationFrame(animate); 
 }
 
-function stopAnimation() {
-    window.cancelAnimationFrame(animate);
+function stopOther(){
+    console.log(otherRequestId)
+    if (otherRequestId) {
+       cancelAnimationFrame(otherRequestId);
+       otherRequestId = undefined;
+       console.log("IT WONT STOP")
+    }
 }
+
 let colorIndex = 0;
 var last = 0;
-function animateAll(now){
+
+var requestId;
+
+function loop(now) {
+    requestId = undefined;
 
     if(up){
         lat+=1;
@@ -509,8 +527,26 @@ function animateAll(now){
     drawEquinoxPath();
     if(lat>-90){drawSummerSolstice();}
     if(lat<90){drawWinterSolstice();}
-    requestAnimationFrame(animateAll); 
+
+    animateAll();
 }
+
+function animateAll() {
+    if (!requestId) {
+       requestId = requestAnimationFrame(loop);
+    }
+}
+
+function stop() {
+    console.log(requestId)
+    if (requestId) {
+       cancelAnimationFrame(requestId);
+       requestId = undefined;
+       console.log("IT WONT STOP")
+    }
+}
+
+
 
 function blinkColors(){
     //console.log(colors[colorIndex]);
@@ -577,8 +613,9 @@ function check(e){
             e.style.background = "green";
             if(game2["score"]>=game2["passing"]){
                 gameNum++;
-                setTimeout(loadGame(),2000);
-                stopAnimation();
+                console.log("thegameprogressed");
+                stopOther();
+                setTimeout(loadGame,2000);
             }
             else{
                 setTimeout(bumpQuestion,2000);
@@ -587,11 +624,23 @@ function check(e){
         else if(lat>0 && e.innerHTML == "Northern"){
             if(tries==1){game2["score"]++;}
             e.style.background = "green";
+            if(game2["score"]>=game2["passing"]){
+                gameNum++;
+                console.log("thegameprogressed");
+                stopOther();
+                setTimeout(loadGame,2000);
+            }
             setTimeout(bumpQuestion,2000);
         }
         else if(lat==0 && e.innerHTML == "Neither"){
             if(tries==1){game2["score"]++;}
             e.style.background = "green";
+            if(game2["score"]>=game2["passing"]){
+                gameNum++;
+                console.log("thegameprogressed");
+                stopOther();
+                setTimeout(loadGame,2000);
+            }
             setTimeout(bumpQuestion,2000);
         }
         else{
