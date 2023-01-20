@@ -48,7 +48,7 @@ canvas{
 
 .question{
     color: white;
-    margin-bottom: 5%;
+    margin-bottom: 2%;
     font-size: 1.5rem;
     top: 60%;
     left:50%;
@@ -57,6 +57,7 @@ canvas{
 }
 
 .button-panel{
+    margin-bottom: 20px;
     position: relative;
     user-select: none;
     display: flex;
@@ -71,6 +72,7 @@ canvas{
     background-color: blue;
     text-align: center;
     color:white;
+    box-shadow: 0px 0px 10px 2px white;
     font-size: 1.5rem;
     caret-color: transparent;
     width: fit-content;
@@ -87,6 +89,7 @@ canvas{
 
 .score{
     width: 80%;
+    
     height:auto;
     background-color: aquamarine;
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
@@ -103,6 +106,7 @@ canvas{
 .passing{
     width: 80%;
     height:auto;
+    margin-bottom: 2px;
     background-color: tomato;
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
     font-size: 2rem;
@@ -113,4 +117,8 @@ canvas{
 
 .passing  span{
     background-color: inherit;
+}
+
+#gameNumber{
+    float: right;
 }

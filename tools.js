@@ -107,6 +107,7 @@ let path = 0;
 var date;
 function loadGame(){
     postScore();
+    postGameNumber();
     if(gameNum==1){
         document.getElementById("question").innerHTML = game1[game1["currentQuestion"]]["question"];
         passing = game1["passing"];
@@ -880,6 +881,10 @@ function postRequirements(){
     for(let i = 0; i<passing; i++){
         document.getElementById("passing").innerHTML += "&#11088;"
     }
+}
+
+function postGameNumber(){
+    document.getElementById("gameNumber").innerHTML = "Game Number " + gameNum;
 }
 
 loadButtons(colors);
