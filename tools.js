@@ -5,9 +5,10 @@ var fudge = 0;
 
 var moveOnDelay = 800;
 
-var gameNum = 4;
+var gameNum = 1;
 var tries = 0;
-
+let score = 0;
+let passing = 0;
 
 var gameList = ["game1","game2"];
 
@@ -27,7 +28,9 @@ var game1 = {
     },
     totalQuestions: 3,
     currentQuestion: 1,
-    complete: false
+    complete: false,
+    passing: 3,
+    score: 0
 }
 
 var game2 = {
@@ -103,8 +106,11 @@ let previousOffset = 0;
 let path = 0;
 var date;
 function loadGame(){
+    postScore();
     if(gameNum==1){
-        document.getElementById("question").innerHTML = game1[gameNum]["question"];
+        document.getElementById("question").innerHTML = game1[game1["currentQuestion"]]["question"];
+        passing = game1["passing"];
+        postRequirements();
         lat = game1["latitude"];
         loadButtons(colors);
         drawScreen();
@@ -115,6 +121,8 @@ function loadGame(){
     }
     else if(gameNum==2){
         document.getElementById("question").innerHTML = game2["question"];
+        passing = game2["passing"];
+        postRequirements();
         loadButtons(hemispheres);
         generateRandomLat();
         drawScreen();
@@ -128,6 +136,8 @@ function loadGame(){
     }
     else if(gameNum==3){
         document.getElementById("question").innerHTML = game3["question"];
+        passing = game3["passing"];
+        postRequirements();
         loadButtons(specialDays);
         lat = 43.6;
         drawScreen();
@@ -141,6 +151,9 @@ function loadGame(){
         drawDayBasedOnOffset(path);
     }
     else if(gameNum==4){
+        document.getElementById("question").innerHTML = game4["question"];
+        passing = game4["passing"];
+        postRequirements();
         generateUnrandomLat();
         let list = loadThreeList();
         loadButtons(list);
@@ -680,130 +693,147 @@ function loadButtons(args){
     document.getElementById("option3").style.background = "blue";
 }
 
-let questionCorrect = false;
+
 
 function check(e){
     tries++;
     console.log(e.innerHTML);
     if(gameNum == 1){
-        if(!game1["complete"]){
-            let answer = game1[game1["currentQuestion"]]["answer"];
-            if(e.innerHTML == answer){
-                e.style.background = "green"; 
-                game1["currentQuestion"]+=1;
-                if(game1["currentQuestion"]>game1["totalQuestions"]){
-                    game1["complete"]==true;
-                    if(tries<=3){
-                        gameNum++;
-                        tries=0;
-                    }
-                    else{
-                        gameNum = 1;
-                        document.getElementById("question").innerHTML = "You didn't ace this one.  Try again."
-                    }
-                    setTimeout(loadGame,moveOnDelay);
+        let answer = game1[game1["currentQuestion"]]["answer"];
+        if(e.innerHTML == answer){
+            e.style.background = "green";
+            if(tries==1){
+                score++; 
+            }
+            game1["currentQuestion"]+=1;
+            if(game1["currentQuestion"]>game1["totalQuestions"]){
+                if(score==3){
+                    postScore();
+                    gameNum++;
+                    score=0;
                 }
-                else {
-                    setTimeout(bumpQuestion,moveOnDelay);
+                else{
+                    document.getElementById("question").innerHTML = "You didn't ace this one.  Try again."
+                    game1["currentQuestion"] = 1;
+                    score = 0;
                 }
-                console.log("right");
-
+                tries=0;
+                setTimeout(loadGame,moveOnDelay);
             }
             else {
-                e.style.background = "red";
-                console.log("wrong");
+                setTimeout(bumpQuestion,moveOnDelay);
+                tries=0;
             }
         }
-        else if(game1["complete"]){
-            gameNum++;
-            questionCorrect=false;
+        else {
+            e.style.background = "red";
         }
     }
     else if(gameNum==2){
+        
+        console.log(tries + " tries")
         if(lat<0 && e.innerHTML == "Southern"){
-            if(tries==1){game2["score"]++;}
+            if(tries==1){score++;}
             e.style.background = "green";
-            if(game2["score"]>=game2["passing"]){
+            if(score>=game2["passing"]){
+                
                 gameNum++;
                 tries=0;
                 stopOther();
                 setTimeout(loadGame,moveOnDelay);
+                score = 0;
             }
             else{
+                
                 setTimeout(bumpQuestion,moveOnDelay);
             }
         }
         else if(lat>0 && e.innerHTML == "Northern"){
-            if(tries==1){game2["score"]++;}
+            if(tries==1){score++;}
             e.style.background = "green";
-            if(game2["score"]>=game2["passing"]){
+            if(score>=game2["passing"]){
+                
                 gameNum++;
                 tries=0;
                 stopOther();
                 setTimeout(loadGame,moveOnDelay);
+                score = 0;
             }
             setTimeout(bumpQuestion,moveOnDelay);
         }
         else if(lat==0 && e.innerHTML == "Neither"){
-            if(tries==1){game2["score"]++;}
+            if(tries==1){score++;}
             e.style.background = "green";
-            if(game2["score"]>=game2["passing"]){
+            if(score>=game2["passing"]){
                 gameNum++;
                 tries=0;
                 stopOther();
                 setTimeout(loadGame,moveOnDelay);
+                score = 0;
             }
             setTimeout(bumpQuestion,moveOnDelay);
         }
         else{
             e.style.background = "red";
         }
+        postScore();
     }
     else if(gameNum==3){
         if(path>0&&e.innerHTML=="Winter Solstice"){
-            if(tries==1){game3["score"]++;}
+            if(tries==1){score++;}
             e.style.background = "green";
             setTimeout(bumpQuestion,moveOnDelay);
         }
         else if(path<0&&e.innerHTML == "Summer Solstice"){
-            if(tries==1){game3["score"]++;}
+            if(tries==1){score++;}
             e.style.background = "green";
             setTimeout(bumpQuestion,moveOnDelay);
         }
         else if(path==0&&e.innerHTML == "Equinox"){
-            if(tries==1){game3["score"]++;}
+            if(tries==1){score++;}
             e.style.background = "green";
             setTimeout(bumpQuestion,moveOnDelay);
         }
         else{
             e.style.background = "red";
         }
-        console.log(game3["score"] + " score");
-        if(game3["score"]==game3["passing"]){
+        if(score==game3["passing"]){
             gameNum++;
             tries=0;
+            score = 0;
             setTimeout(loadGame,moveOnDelay);
         }
+        postScore();
     }
     else if(gameNum==4){
-        console.log(correctAnswer + " correct");
-        console.log(e.innerHTML + " innerHTML");
-        console.log("These are the same: " + correctAnswer.normalize() == e.innerHTML.normalize());
-        if(e.innerHTML==correctAnswer){
+        let answer = encodeURI(correctAnswer);
+        let test = encodeURI(e.innerHTML);
+        if(answer==test){
             if(tries==1){
-                game4["score"]++;
+                score++;
                 e.style.background = "green";
                 setTimeout(loadGame,moveOnDelay);
             }
-            if(game4["score"]>=game4["passing"]){
-                tries=0;
-                gameNum++;
+            else{
+                e.style.background = "green";
                 setTimeout(loadGame,moveOnDelay);
             }
+            if(score>=game4["passing"]){
+                tries=0;
+                gameNum++;
+                score = 0;
+                e.style.background = "green";
+                score = 0;
+                setTimeout(loadGame,moveOnDelay);
+            }
+            tries=0;
+            console.log(score);
+            console.log(tries);
         }
         else{
             e.style.background = "red";
         }
+        postScore();
     }
 }
 
@@ -811,6 +841,7 @@ function bumpQuestion(){
     if(gameNum==1){
         document.getElementById("question").innerHTML = game1[game1["currentQuestion"]]["question"];
         loadButtons(colors);
+        postScore();
     }
     else if(gameNum==2){
         loadButtons(hemispheres);
@@ -835,6 +866,20 @@ function bumpQuestion(){
         loadGame();
     }
     tries=0;
+}
+
+function postScore(){
+    document.getElementById("score").innerHTML = "";
+    for(var i = 0; i<score; i++){
+        document.getElementById("score").innerHTML += "&#11088;"
+    }
+}
+
+function postRequirements(){
+    document.getElementById("passing").innerHTML = "";
+    for(let i = 0; i<passing; i++){
+        document.getElementById("passing").innerHTML += "&#11088;"
+    }
 }
 
 loadButtons(colors);

@@ -38,8 +38,8 @@ canvas{
     position: absolute;
     top: 65%;
     left: 50%;
-    width: 50%;
-    transform: translate(-50%,-50%);
+    width: 70%;
+    transform: translate(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -85,3 +85,32 @@ canvas{
     transition: all 0.3s;
 }
 
+.score{
+    width: 80%;
+    height:auto;
+    background-color: aquamarine;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-size: 2rem;
+    z-index: 2;
+    border-radius: 3px;
+    padding: 5px;
+}
+
+.score span{
+    background-color: inherit;
+}
+
+.passing{
+    width: 80%;
+    height:auto;
+    background-color: tomato;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-size: 2rem;
+    z-index: 2;
+    border-radius: 3px;
+    padding: 5px;
+}
+
+.passing  span{
+    background-color: inherit;
+}
