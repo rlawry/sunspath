@@ -2,13 +2,22 @@ const c = document.getElementById("canvas");
 const ctx = c.getContext("2d");
 let lat = -10;
 var fudge = 0;
+let offset = 79.749813785;  //tilt of 23.5° gets us this value.
 
-var moveOnDelay = 800;
+let equinoxOffset = 0;
+let summerSolsticeOffset = -1*offset;
+let winterSolsticeOffset = offset;
 
-var gameNum = 1;
+let equinoxColor = "yellow";
+let summerColor = "red";
+let winterColor = "lightblue";
+let lineW = 2;
+
+var gameNum = 3;
 var tries = 0;
 let score = 0;
 let passing = 0;
+var moveOnDelay = 800;
 
 var gameList = ["game1","game2"];
 
@@ -115,9 +124,11 @@ function loadGame(){
         lat = game1["latitude"];
         loadButtons(colors);
         drawDiagram(true);
-        drawEquinoxPath();
-        drawSummerSolstice();
-        drawWinterSolstice();
+        drawDayBasedOnOffset(equinoxOffset,equinoxColor);
+        drawDayBasedOnOffset(summerSolsticeOffset,summerColor);
+        drawDayBasedOnOffset(winterSolsticeOffset,winterColor);
+        //drawDayBasedOnOffset(equinoxOffset,equinoxColor);
+        
     }
     else if(gameNum==2){
         document.getElementById("question").innerHTML = game2["question"];
@@ -128,9 +139,9 @@ function loadGame(){
         drawDiagram(false);
         let path = Math.floor(Math.random()*3)+1;
         console.log(path + " path");
-        if(path == 1){drawSummerSolstice();}
-        else if(path == 2){drawWinterSolstice();}
-        else if(path==3){drawEquinoxPath();}
+        if(path == 1){drawDayBasedOnOffset(summerSolsticeOffset,summerColor);}
+        else if(path == 2){drawDayBasedOnOffset(winterSolsticeOffset,winterColor);}
+        else if(path==3){drawDayBasedOnOffset(equinoxOffset,equinoxColor);}
         animate();
     }
     else if(gameNum==3){
@@ -146,7 +157,7 @@ function loadGame(){
         if(path<1&&path>-1){path=0;}
         previousOffset = path;
         console.log(path + " path");
-        drawDayBasedOnOffset(path);
+        drawDayBasedOnOffset(path,equinoxColor);
     }
     else if(gameNum==4){
         document.getElementById("question").innerHTML = game4["question"];
@@ -157,15 +168,15 @@ function loadGame(){
         loadButtons(list);
         drawDiagram(false);
         if(lat>0){
-            drawSummerSolstice();
+            drawDayBasedOnOffset(summerSolsticeOffset,summerColor);
             document.getElementById("month").innerHTML = "June";
         }
         if(lat<0){
-            drawWinterSolstice();
+            drawDayBasedOnOffset(winterSolsticeOffset,winterColor);
             document.getElementById("month").innerHTML = "December";
         }
         if(lat==0){
-            drawEquinoxPath();
+            drawDayBasedOnOffset(equinoxOffset,equinoxColor);
             document.getElementById("month").innerHTML = "March/September";
         }
     }
@@ -407,85 +418,17 @@ function drawSmallIncrements(){
 
 let startAngle, endAngle;
 
-function drawEquinoxPath(){
-    ctx.save();
-    let phi = Math.atan(40*(Math.cos(rad(90-lat))/200*Math.tan(rad(90-lat))));
-    ctx.beginPath();
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = colors[1];
-    if(lat>=0){
-        startAngle = Math.PI/2-phi-fudge;
-        endAngle = 3*Math.PI/2-phi-fudge;
-    }
-    else if(lat<0){
-        startAngle = Math.PI/2+phi-fudge;
-        endAngle = 3*Math.PI/2+phi-fudge;
-    }
-    ctx.translate(c.width/2,c.height/2);
-    ctx.rotate(rad(90-lat));
-    ctx.ellipse(0,0,200,Math.abs(40*Math.cos(rad(90-lat))),0,startAngle,endAngle,false);
-    ctx.stroke();
-    ctx.closePath();
-    ctx.restore();
-}
-
-function drawSummerSolstice(){
+function drawDayBasedOnOffset(offsetSelect, col){
     let angle=90-lat;
-    let offset = 79.749813785;  //tilt of 23.5° gets us this value.
     let newCenter = {
-        x:offset*Math.sin(rad(angle)),
-        y:-offset*Math.cos(rad(angle))
+        x:-offsetSelect*Math.sin(rad(angle)),
+        y:offsetSelect*Math.cos(rad(angle))
     };
-    
-    let newDiameter = 200*Math.sin(Math.acos(offset/200));
-    let scale40 = newDiameter/200;
-    let new40 = scale40*40;
-
-    let phi = Math.atan(40*(Math.cos(rad(90-lat))/200*Math.tan(rad(90-lat))));
-    let newPhi = Math.atan(new40/newDiameter*Math.tan(Math.acos(offset*Math.tan(rad(lat)/newDiameter))));
-    let ex = offset*Math.tan(rad(lat));
-
-    let circlePhi = Math.acos(ex/newDiameter);
-
-    if(ex >= newDiameter){
-        circlePhi = 0;
-        phi = 0;
-    }
-    if(lat>=0){
-        startAngle = deg(circlePhi-phi)-fudge;
-        endAngle = deg(2*Math.PI-circlePhi-phi)-fudge;
-    }
-    else if(lat<0){
-        startAngle = deg(circlePhi+phi)-fudge;
-        endAngle = deg(2*Math.PI-circlePhi+phi)-fudge;
-    }
- 
-    ctx.save();
-    ctx.translate(c.width/2,c.height/2);
-    ctx.translate(newCenter.x,newCenter.y);
-    ctx.beginPath();
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = colors[2];
-    ctx.rotate(rad(90-lat));
-    ctx.ellipse(0,0,newDiameter,Math.abs(40*Math.cos(rad(angle)))*scale40,0,rad(startAngle),rad(endAngle),false);
-    
-    ctx.stroke();
-    ctx.closePath();
-    ctx.restore();
-}
-
-function drawWinterSolstice(){
-    let angle=90-lat;
-    let offset = 79.749813785;
-    let newCenter = {
-        x:-offset*Math.sin(rad(angle)),
-        y:offset*Math.cos(rad(angle))
-    };
-    let newDiameter = 200*Math.sin(Math.acos(offset/200));
+    let newDiameter = 200*Math.sin(Math.acos(offsetSelect/200));
     let scale40 = newDiameter/200;
 
     let phi = Math.atan(40*(Math.cos(rad(90-lat))/200*Math.tan(rad(90-lat))));
-    let ex = -1*offset*Math.tan(rad(lat));
+    let ex = -1*offsetSelect*Math.tan(rad(lat));
     let circlePhi = Math.acos(ex/newDiameter);
 
     if(ex >= newDiameter){
@@ -505,48 +448,8 @@ function drawWinterSolstice(){
     ctx.translate(c.width/2,c.height/2);
     ctx.translate(newCenter.x,newCenter.y);
     ctx.beginPath();
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = colors[0];
-    ctx.rotate(rad(90-lat));
-    ctx.ellipse(0,0,newDiameter,Math.abs(40*Math.cos(rad(angle)))*scale40,0,rad(startAngle),rad(endAngle),false);
-    
-    ctx.stroke();
-    ctx.closePath();
-    ctx.restore();
-}
-
-function drawDayBasedOnOffset(offset){
-    let angle=90-lat;
-    let newCenter = {
-        x:-offset*Math.sin(rad(angle)),
-        y:offset*Math.cos(rad(angle))
-    };
-    let newDiameter = 200*Math.sin(Math.acos(offset/200));
-    let scale40 = newDiameter/200;
-
-    let phi = Math.atan(40*(Math.cos(rad(90-lat))/200*Math.tan(rad(90-lat))));
-    let ex = -1*offset*Math.tan(rad(lat));
-    let circlePhi = Math.acos(ex/newDiameter);
-
-    if(ex >= newDiameter){
-        circlePhi = 0;
-        phi = 0;
-    }
-    if(lat>=0){
-        startAngle = deg(circlePhi-phi)-fudge;
-        endAngle = deg(2*Math.PI-circlePhi-phi)-fudge;
-    }
-    else if(lat<0){
-        startAngle = deg(circlePhi+phi)-fudge;
-        endAngle = deg(2*Math.PI-circlePhi+phi)-fudge;
-    }
-
-    ctx.save();
-    ctx.translate(c.width/2,c.height/2);
-    ctx.translate(newCenter.x,newCenter.y);
-    ctx.beginPath();
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = 'yellow';
+    ctx.lineWidth = lineW;
+    ctx.strokeStyle = col;
     ctx.rotate(rad(90-lat));
     ctx.ellipse(0,0,newDiameter,Math.abs(40*Math.cos(rad(angle)))*scale40,0,rad(startAngle),rad(endAngle),false);
     
@@ -596,7 +499,7 @@ function animate(){
     }
     drawScreen();
     drawDiagram(false);
-    drawDayBasedOnOffset(currentOffset);
+    drawDayBasedOnOffset(currentOffset,equinoxColor);
 }
 
 function stopOther(){
@@ -632,9 +535,9 @@ function loop(now) {
 
     drawScreen();
     drawDiagram(true);
-    drawEquinoxPath();
-    if(lat>-90){drawSummerSolstice();}
-    if(lat<90){drawWinterSolstice();}
+    drawDayBasedOnOffset(equinoxOffset,equinoxColor);
+    if(lat>-90){drawDayBasedOnOffset(summerSolsticeOffset,summerColor);}
+    if(lat<90){drawDayBasedOnOffset(winterSolsticeOffset,winterColor);}
 
     animateAll();
 }
@@ -659,8 +562,6 @@ function stop() {
     }
 }
 
-
-
 function blinkColors(){
     //console.log(colors[colorIndex]);
     //console.log(colorIndex + " color index");
@@ -680,8 +581,6 @@ function loadButtons(args){
     document.getElementById("option3").innerHTML = args[2];
     document.getElementById("option3").style.background = "blue";
 }
-
-
 
 function check(e){
     tries++;
@@ -834,21 +733,17 @@ function bumpQuestion(){
     else if(gameNum==2){
         loadButtons(hemispheres);
         generateRandomLat();
-        drawScreen();
         drawDiagram(false);
     }
     else if(gameNum==3){
         loadButtons(specialDays);
-        drawScreen();
         drawDiagram(true);
-        console.log(previousOffset + " previous");
         while(previousOffset == path){
             path = Math.sin((Math.floor(Math.random()*3)+1)*Math.PI/2)*offsetRange;
-            console.log(path + " current path");
         }
         if(path<1&&path>-1){path=0;}
         previousOffset = path;
-        drawDayBasedOnOffset(path);
+        drawDayBasedOnOffset(path,equinoxColor);
     }
     else if(gameNum==4){
         loadGame();
