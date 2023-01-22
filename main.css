@@ -15,6 +15,7 @@ canvas{
 .title{
     position: absolute;
     display: flex;
+    background: inherit;
     top: 5%;
     left: 50%;
     flex-direction: row;
@@ -30,6 +31,7 @@ canvas{
     font-family: 'Courier New', Courier, monospace;
     font-size: 1.5rem;
     color: white;
+    background: inherit;
     top: 20%;
     left: 50%;
     transform: translate(-50%,-50%);
@@ -38,6 +40,7 @@ canvas{
 
 .game-panel{
     position: absolute;
+    background: inherit;
     top: 65%;
     left: 50%;
     width: 70%;
@@ -50,6 +53,7 @@ canvas{
 
 .question{
     color: white;
+    background: inherit;
     margin-bottom: 2%;
     font-size: 1.5rem;
     top: 60%;
@@ -60,6 +64,7 @@ canvas{
 
 .button-panel{
     margin-bottom: 20px;
+    background: inherit;
     position: relative;
     user-select: none;
     display: flex;

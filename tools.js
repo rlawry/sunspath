@@ -48,6 +48,7 @@ var games = {
         },
         totalQuestions: 3,
         currentQuestion: 1,
+        background: "#110011",
         complete: false,
         passing: 3,
         score: 0
@@ -57,6 +58,7 @@ var games = {
         question: "What is the latitude of the observer?",
         score: 0,
         passing: 6,
+        background: "#111100",
         complete: false
     },
     
@@ -64,6 +66,7 @@ var games = {
         question: "In which hemisphere is the observer?  Watch the sun's path over the course of a year.",
         score: 0,
         passing: 6,
+        background: "#000011",
         complete: false
     },
     
@@ -71,6 +74,7 @@ var games = {
         question: "Which path is shown?",
         passing: 5,
         score:0,
+        background: "#001100",
         complete: false
     },
     
@@ -78,6 +82,7 @@ var games = {
         question: "What is the latitude of the observer?",
         passing: 5,
         score: 0,
+        background: "#111111",
         complete: false
     }
 }
@@ -262,6 +267,8 @@ function shuffleList(lesht){
     return lesht;
 }
 
+var streak = 0;
+
 function check(e){
     
     tries++;
@@ -310,6 +317,7 @@ function check(e){
         }
         else{
             e.style.background = "red";
+            score = 0;
         }
     }
     else if(gameNum==3){
@@ -348,6 +356,7 @@ function check(e){
         }
         else{
             e.style.background = "red";
+            score = 0;
         }
         postScore();
     }
@@ -372,6 +381,7 @@ function check(e){
         }
         else{
             e.style.background = "red";
+            score = 0;
         }
         if(score==passing){
             gameNum++;
@@ -396,6 +406,7 @@ function check(e){
         }
         else{
             e.style.background = "red";
+            score = 0;
         }
         postScore();
     }
@@ -425,7 +436,10 @@ function postRequirements(){
 }
 
 function postGameNumber(){
-    document.getElementById("gameNumber").innerHTML = "Game Number " + gameNum;
+    if(gameNum<6){document.getElementById("gameNumber").innerHTML = "Game Number " + gameNum;}
+    else{
+        document.getElementById("gameNumber").innerHTML = "All Games Complete";
+    }
 }
 
 function loadThreeList(){                                                                   //pick the answer index of the latitude list then load a list with the other two items.
@@ -488,8 +502,9 @@ function drawDiagram(polaris){
 }
 
 function drawScreen(){
-    ctx.fillStyle = "black";
+    ctx.fillStyle = games[gameNum]["background"];
     ctx.fillRect(0,0,c.width,c.height);
+    document.body.style.background = games[gameNum]["background"];
 }
 
 function drawGround(){
