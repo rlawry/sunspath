@@ -1,8 +1,11 @@
 const c = document.getElementById("canvas");
 const ctx = c.getContext("2d");
+
+//diagram variables
+
 let lat = -10;
 var fudge = 0;
-let offset = 79.749813785;  //tilt of 23.5° gets us this value.
+let offset = 79.749813785;  //tilt of 23.5° gets us this value.  
 
 let equinoxOffset = 0;
 let summerSolsticeOffset = -1*offset;
@@ -13,54 +16,70 @@ let summerColor = "red";
 let winterColor = "lightblue";
 let lineW = 2;
 
-var gameNum = 3;
+//global variables for game function
+
+var gameNum = 1;
 var tries = 0;
 let score = 0;
 let passing = 0;
 var moveOnDelay = 800;
 
-var gameList = ["game1","game2"];
+//array and variables for game 4
 
-var game1 = {
-    latitude: 43.6,
-    1: {
-        question: "Which path is the Equinox path?",
-        answer: "yellow"
+var threeLatitudesList = [0,0,0];       
+var stringLat;
+var correctAnswer;
+
+//game specific details
+var games = {
+    1 : {
+        latitude: 43.6,
+        1: {
+            question: "Which path is the Equinox path?",
+            answer: "yellow"
+        },
+        2:{
+            question: "Which path is the Summer Solstice path?",
+            answer: "red"
+        },
+        3:{
+            question: "Which path is the Winter Solstice path?",
+            answer: "blue"
+        },
+        totalQuestions: 3,
+        currentQuestion: 1,
+        complete: false,
+        passing: 3,
+        score: 0
     },
-    2:{
-        question: "Which path is the Summer Solstice path?",
-        answer: "red"
+    
+    2 : {
+        question: "What is the latitude of the observer?",
+        score: 0,
+        passing: 6,
+        complete: false
     },
-    3:{
-        question: "Which path is the Winter Solstice path?",
-        answer: "blue"
+    
+    3 : {
+        question: "In which hemisphere is the observer?  Watch the sun's path over the course of a year.",
+        score: 0,
+        passing: 6,
+        complete: false
     },
-    totalQuestions: 3,
-    currentQuestion: 1,
-    complete: false,
-    passing: 3,
-    score: 0
-}
-
-var game2 = {
-    question: "In which hemisphere is the observer?  Watch the sun's path over the course of a year.",
-    score: 0,
-    passing: 6,
-    complete: false
-}
-
-var game3 = {
-    question: "Which path is shown?",
-    passing: 5,
-    score:0,
-    complete: false
-}
-
-var game4 = {
-    question: "What is the latitude of the observer?",
-    passing: 5,
-    score: 0,
-    complete: false
+    
+    4 : {
+        question: "Which path is shown?",
+        passing: 5,
+        score:0,
+        complete: false
+    },
+    
+    5 : {
+        question: "What is the latitude of the observer?",
+        passing: 5,
+        score: 0,
+        complete: false
+    }
 }
 
 var directRays = [
@@ -110,32 +129,74 @@ var hemispheres = [
     "Northern",
     "Southern",
     "Neither"
-]
+];
+
+//get up and running
+
+function init(){
+    //c.height = window.innerHeight;
+    //c.width = window.innerWidth;
+    loadGame();
+}
+
+function resizeDiagram(){
+    //c.height = window.innerHeight;
+    //c.width = window.innerWidth;
+    loadGame();
+}
+
+window.addEventListener("resize",function(){
+    resizeDiagram();
+});
+
+//game function
+
 let previousOffset = 0;
 let path = 0;
 var date;
+
 function loadGame(){
     postScore();
     postGameNumber();
+    console.log(Object.keys(games).length + " length and num " + gameNum);
+    if(gameNum<games.length+1){passing = games[gameNum]["passing"];}
+    console.log(passing + " passing");
     if(gameNum==1){
-        document.getElementById("question").innerHTML = game1[game1["currentQuestion"]]["question"];
-        passing = game1["passing"];
+        document.getElementById("question").innerHTML = games[gameNum][games[gameNum]["currentQuestion"]]["question"];
+        passing = games[gameNum]["passing"];
         postRequirements();
-        lat = game1["latitude"];
+        lat = games[gameNum]["latitude"];
         loadButtons(colors);
         drawDiagram(true);
         drawDayBasedOnOffset(equinoxOffset,equinoxColor);
         drawDayBasedOnOffset(summerSolsticeOffset,summerColor);
-        drawDayBasedOnOffset(winterSolsticeOffset,winterColor);
-        //drawDayBasedOnOffset(equinoxOffset,equinoxColor);
-        
+        drawDayBasedOnOffset(winterSolsticeOffset,winterColor);        
     }
     else if(gameNum==2){
-        document.getElementById("question").innerHTML = game2["question"];
-        passing = game2["passing"];
+        document.getElementById("question").innerHTML = games[gameNum]["question"];
+        lat = Math.abs(generateRandomLat());
+        let falseAnswer1 = Math.abs(generateRandomLat());
+        let falseAnswer2 = Math.abs(generateRandomLat());
+        threeLatitudesList = [lat,falseAnswer1,falseAnswer2];
+        console.log(threeLatitudesList);
+        threeLatitudesList = shuffleList(threeLatitudesList);
+        passing = games[gameNum]["passing"];
+        postRequirements();
+        drawDiagram(true);
+        drawDayBasedOnOffset(equinoxOffset,equinoxColor);
+        let buttonList = [0,0,0];
+        for(var i = 0; i<threeLatitudesList.length; i++){
+            buttonList[i]=latToString(threeLatitudesList[i]);
+        }
+        loadButtons(buttonList);
+
+    }
+    else if(gameNum==3){
+        document.getElementById("question").innerHTML = games[gameNum]["question"];
+        passing = games[gameNum]["passing"];
         postRequirements();
         loadButtons(hemispheres);
-        generateRandomLat();
+        lat = generateRandomLat();
         drawDiagram(false);
         let path = Math.floor(Math.random()*3)+1;
         console.log(path + " path");
@@ -144,9 +205,9 @@ function loadGame(){
         else if(path==3){drawDayBasedOnOffset(equinoxOffset,equinoxColor);}
         animate();
     }
-    else if(gameNum==3){
-        document.getElementById("question").innerHTML = game3["question"];
-        passing = game3["passing"];
+    else if(gameNum==4){                                                        //whole game at latitude 43.6
+        document.getElementById("question").innerHTML = games[gameNum]["question"];
+        passing = games[gameNum]["passing"];
         postRequirements();
         loadButtons(specialDays);
         lat = 43.6;
@@ -159,9 +220,9 @@ function loadGame(){
         console.log(path + " path");
         drawDayBasedOnOffset(path,equinoxColor);
     }
-    else if(gameNum==4){
-        document.getElementById("question").innerHTML = game4["question"];
-        passing = game4["passing"];
+    else if(gameNum==5){
+        document.getElementById("question").innerHTML = games[gameNum]["question"];
+        passing = games[gameNum]["passing"];
         postRequirements();
         generateUnrandomLat();
         let list = loadThreeList();
@@ -180,16 +241,192 @@ function loadGame(){
             document.getElementById("month").innerHTML = "March/September";
         }
     }
-    else if(gameNum==5){
+    else if(gameNum==6){
         document.getElementById("question").innerHTML = "You did it!";
         date = new Date();
         animateAll();
     }
 }
 
-var threeLatitudesList = [0,0,0];
-var stringLat;
-var correctAnswer;
+function shuffleList(lesht){
+    var m = lesht.length, t, i;
+    
+    // Shuffle
+    while (m) {
+        i = Math.floor(Math.random() * m--);
+        t = lesht[m];
+        lesht[m] = lesht[i];
+        lesht[i] = t;
+    }
+
+    return lesht;
+}
+
+function check(e){
+    
+    tries++;
+    
+    if(gameNum == 1){
+        let answer = games[gameNum][games[gameNum]["currentQuestion"]]["answer"];
+        if(e.innerHTML == answer){
+            e.style.background = "green";
+            if(tries==1){
+                score++; 
+            }
+            games[gameNum]["currentQuestion"]+=1;
+            if(games[gameNum]["currentQuestion"]>games[gameNum]["totalQuestions"]){
+                if(score==3){
+                    postScore();
+                    gameNum++;
+                    score=0;
+                }
+                else{
+                    document.getElementById("question").innerHTML = "You didn't ace this one.  Try again."
+                    games[gameNum]["currentQuestion"] = 1;
+                    score = 0;
+                }
+                tries=0;
+                setTimeout(loadGame,moveOnDelay);
+            }
+            else {
+                setTimeout(bumpQuestion,moveOnDelay);
+                tries=0;
+            }
+        }
+        else {
+            e.style.background = "red";
+        }
+    }
+    else if(gameNum==2){
+        if(latToString(lat)==e.innerHTML){
+            if(tries==1){score++;}
+            e.style.background = "green";
+            if(score>=passing){
+                gameNum++;
+                score = 0;
+            }
+            tries=0;
+            setTimeout(loadGame,moveOnDelay);
+        }
+        else{
+            e.style.background = "red";
+        }
+    }
+    else if(gameNum==3){
+        if(lat<0 && e.innerHTML == "Southern"){
+            if(tries==1){score++;}
+            e.style.background = "green";
+            if(score>=passing){
+                gameNum++;
+                stopOther();
+                score = 0;
+            }
+            tries=0;
+            setTimeout(loadGame,moveOnDelay);
+        }
+        else if(lat>0 && e.innerHTML == "Northern"){
+            if(tries==1){score++;}
+            e.style.background = "green";
+            if(score>=passing){
+                gameNum++;
+                stopOther();
+                score = 0;
+            }
+            tries=0;
+            setTimeout(loadGame,moveOnDelay);
+        }
+        else if(lat==0 && e.innerHTML == "Neither"){
+            if(tries==1){score++;}
+            e.style.background = "green";
+            if(score>=passing){
+                gameNum++;
+                stopOther();
+                score = 0;
+            }
+            tries=0;
+            setTimeout(loadGame,moveOnDelay);
+        }
+        else{
+            e.style.background = "red";
+        }
+        postScore();
+    }
+    else if(gameNum==4){
+        if(path>0&&e.innerHTML=="Winter Solstice"){
+            if(tries==1){score++;}
+            e.style.background = "green";
+            setTimeout(loadGame,moveOnDelay);
+            tries=0;
+        }
+        else if(path<0&&e.innerHTML == "Summer Solstice"){
+            if(tries==1){score++;}
+            e.style.background = "green";
+            setTimeout(loadGame,moveOnDelay);
+            tries=0;
+        }
+        else if(path==0&&e.innerHTML == "Equinox"){
+            if(tries==1){score++;}
+            e.style.background = "green";
+            setTimeout(loadGame,moveOnDelay);
+            tries=0;
+        }
+        else{
+            e.style.background = "red";
+        }
+        if(score==passing){
+            gameNum++;
+            tries=0;
+            score = 0;
+            setTimeout(loadGame,moveOnDelay);
+        }
+        postScore();
+    }
+    else if(gameNum==5){
+        let answer = encodeURI(correctAnswer);
+        let test = encodeURI(e.innerHTML);
+        if(answer==test){
+            if(tries==1){score++;}
+            if(score>=passing){
+                gameNum++;
+                score = 0;
+            }
+            setTimeout(loadGame,moveOnDelay);
+            e.style.background = "green";
+            tries=0;
+        }
+        else{
+            e.style.background = "red";
+        }
+        postScore();
+    }
+}
+
+function bumpQuestion(){
+    if(gameNum==1){
+        document.getElementById("question").innerHTML = games[gameNum][games[gameNum]["currentQuestion"]]["question"];
+        loadButtons(colors);
+        postScore();
+    }
+    tries=0;
+}
+
+function postScore(){
+    document.getElementById("score").innerHTML = "";
+    for(var i = 0; i<score; i++){
+        document.getElementById("score").innerHTML += "&#11088;"
+    }
+}
+
+function postRequirements(){
+    document.getElementById("passing").innerHTML = "";
+    for(let i = 0; i<passing; i++){
+        document.getElementById("passing").innerHTML += "&#11088;"
+    }
+}
+
+function postGameNumber(){
+    document.getElementById("gameNumber").innerHTML = "Game Number " + gameNum;
+}
 
 function loadThreeList(){                                                                   //pick the answer index of the latitude list then load a list with the other two items.
     correctAnswer = lat; //generated by "unrandomlat" function
@@ -208,15 +445,8 @@ function loadThreeList(){                                                       
     threeLatitudesList[2] = falseAnswer2;
 
     //randomize the indexes 1 through 3 and place the values of the 3 answers (both true and 2 false) into them
-    var m = threeLatitudesList.length, t, i;
     
-    // Shuffle
-    while (m) {
-        i = Math.floor(Math.random() * m--);
-        t = threeLatitudesList[m];
-        threeLatitudesList[m] = threeLatitudesList[i];
-        threeLatitudesList[i] = t;
-    }
+    threeLatitudesList = shuffleList(threeLatitudesList);
 
     for(var i = 0; i<threeLatitudesList.length; i++){
         threeLatitudesList[i]=latToString(threeLatitudesList[i]);
@@ -242,14 +472,10 @@ function generateUnrandomLat(){
 
 function generateRandomLat(){
     let sign = Math.random() < 0.5 ? -1 : 1;
-    lat = Math.floor(Math.random()*90) * sign;
+    return Math.floor(Math.random()*90) * sign;
 }
 
-function init(){
-    c.height = window.innerHeight;
-    c.width = window.innerWidth;
-    loadGame();
-}
+//drawing functions
 
 function drawDiagram(polaris){
     drawScreen();
@@ -272,7 +498,7 @@ function drawGround(){
     ctx.lineWidth = 1;
     ctx.fillStyle = "green";
     ctx.strokeStyle = "green";
-    ctx.ellipse(c.width/2,c.height/2,200,40,0,2*Math.PI,false);
+    ctx.ellipse(c.width/2,3*c.height/4,200,40,0,2*Math.PI,false);
     ctx.stroke();
     ctx.fill();
     ctx.closePath();
@@ -284,7 +510,7 @@ function drawSky(){
     ctx.beginPath();
     ctx.lineWidth = 1;
     ctx.strokeStyle = "skyblue";
-    ctx.arc(c.width/2,c.height/2,200,0,Math.PI,true);
+    ctx.arc(c.width/2,3*c.height/4,200,0,Math.PI,true);
     ctx.stroke();
     ctx.restore();
 }
@@ -294,7 +520,7 @@ function drawPolaris(){
     ctx.save();
     ctx.strokeStyle = "yellow";
     ctx.setLineDash([5,3]);
-    ctx.translate(c.width/2,c.height/2);
+    ctx.translate(c.width/2,3*c.height/4);
     ctx.moveTo(0,0);
     ctx.rotate(-1*lat*Math.PI/180);
     ctx.lineTo(300,0);
@@ -329,12 +555,11 @@ function drawStar(cx, cy, spikes, outerRadius, innerRadius) {
     ctx.stroke();
     ctx.fillStyle='white';
     ctx.fill();
-
 }
 
 function drawCompass(){
     ctx.save();
-    ctx.translate(c.width/2,c.height/2);
+    ctx.translate(c.width/2,3*c.height/4);
     ctx.lineWidth = 2;
     ctx.font = "20px Arial";
     ctx.fillStyle = "pink";
@@ -367,7 +592,7 @@ function drawBigIncrements(){
     ctx.save();
     ctx.lineWidth = 1;
     ctx.strokeStyle = "white";
-    ctx.translate(c.width/2,c.height/2);
+    ctx.translate(c.width/2,3*c.height/4);
     ctx.font = "20px Arial";
     ctx.fillStyle = "white";
     ctx.textAlign="center";
@@ -401,7 +626,7 @@ function drawSmallIncrements(){
     ctx.save();
     ctx.lineWidth = 1;
     ctx.strokeStyle = "white";
-    ctx.translate(c.width/2,c.height/2);
+    ctx.translate(c.width/2,3*c.height/4);
     ctx.rotate(-1*Math.PI/180);
     for(var j = 0; j<18; j+=1){
         for(var i = 0; i<9; i+=1){
@@ -416,9 +641,15 @@ function drawSmallIncrements(){
     ctx.restore();
 }
 
+//big path of sun math and drawing - arcs based on "offset"
+
 let startAngle, endAngle;
 
+let savedOffset, savedColor;
+
 function drawDayBasedOnOffset(offsetSelect, col){
+    savedOffset = offsetSelect;
+    savedColor = col;
     let angle=90-lat;
     let newCenter = {
         x:-offsetSelect*Math.sin(rad(angle)),
@@ -445,7 +676,7 @@ function drawDayBasedOnOffset(offsetSelect, col){
     }
 
     ctx.save();
-    ctx.translate(c.width/2,c.height/2);
+    ctx.translate(c.width/2,3*c.height/4);
     ctx.translate(newCenter.x,newCenter.y);
     ctx.beginPath();
     ctx.lineWidth = lineW;
@@ -466,10 +697,32 @@ function deg(theta){
     return theta*180/Math.PI;
 }
 
-function makeNew(){
-    lat = Math.floor(Math.random()*90);
-    init();
+function blinkColors(){
+    //console.log(colors[colorIndex]);
+    //console.log(colorIndex + " color index");
+    document.getElementById("option1").style.background = colors[colorIndex];
+    document.getElementById("option2").style.background = colors[colorIndex];
+    document.getElementById("option3").style.background = colors[colorIndex];
+    colorIndex++;
+    //console.log(colorIndex + " color index");
+    if(colorIndex==colors.length){colorIndex=0;}
 }
+
+function loadButtons(args){
+    document.getElementById("option1").innerHTML = args[0];
+    document.getElementById("option1").style.background = "blue";
+    document.getElementById("option2").innerHTML = args[1];
+    document.getElementById("option2").style.background = "blue";
+    document.getElementById("option3").innerHTML = args[2];
+    document.getElementById("option3").style.background = "blue";
+}
+
+function plopMonth(index){
+    console.log(months[index]);
+    document.getElementById("month").innerHTML = months[index];
+}
+
+//all animations
 
 var up = true;
 var offsetRange = 79.749813785;
@@ -477,14 +730,12 @@ var currentOffset = 0;
 var step = 0;
 var otherRequestId;
 
-function loop1(){
-    otherRequestId = undefined;
-    animate();
-}
-
 var monthInterval = 2*Math.PI/12;
 var indexNow = 0;
 var previousIndex = indexNow;
+
+//game 2 animation
+
 function animate(){
     if (!otherRequestId) {
         otherRequestId = window.requestAnimationFrame(loop1);
@@ -502,17 +753,22 @@ function animate(){
     drawDayBasedOnOffset(currentOffset,equinoxColor);
 }
 
+function loop1(){
+    otherRequestId = undefined;
+    animate();
+}
+
 function stopOther(){
-    console.log(otherRequestId)
     if (otherRequestId) {
        cancelAnimationFrame(otherRequestId);
        otherRequestId = undefined;
-       console.log("IT WONT STOP")
     }
 }
 
 let colorIndex = 0;
 var last = 0;
+
+//final animation
 
 var requestId;
 
@@ -542,11 +798,6 @@ function loop(now) {
     animateAll();
 }
 
-function plopMonth(index){
-    console.log(months[index]);
-    document.getElementById("month").innerHTML = months[index];
-}
-
 function animateAll() {
     if (!requestId) {
        requestId = requestAnimationFrame(loop);
@@ -562,212 +813,4 @@ function stop() {
     }
 }
 
-function blinkColors(){
-    //console.log(colors[colorIndex]);
-    //console.log(colorIndex + " color index");
-    document.getElementById("option1").style.background = colors[colorIndex];
-    document.getElementById("option2").style.background = colors[colorIndex];
-    document.getElementById("option3").style.background = colors[colorIndex];
-    colorIndex++;
-    //console.log(colorIndex + " color index");
-    if(colorIndex==colors.length){colorIndex=0;}
-}
-
-function loadButtons(args){
-    document.getElementById("option1").innerHTML = args[0];
-    document.getElementById("option1").style.background = "blue";
-    document.getElementById("option2").innerHTML = args[1];
-    document.getElementById("option2").style.background = "blue";
-    document.getElementById("option3").innerHTML = args[2];
-    document.getElementById("option3").style.background = "blue";
-}
-
-function check(e){
-    tries++;
-    console.log(e.innerHTML);
-    if(gameNum == 1){
-        let answer = game1[game1["currentQuestion"]]["answer"];
-        if(e.innerHTML == answer){
-            e.style.background = "green";
-            if(tries==1){
-                score++; 
-            }
-            game1["currentQuestion"]+=1;
-            if(game1["currentQuestion"]>game1["totalQuestions"]){
-                if(score==3){
-                    postScore();
-                    gameNum++;
-                    score=0;
-                }
-                else{
-                    document.getElementById("question").innerHTML = "You didn't ace this one.  Try again."
-                    game1["currentQuestion"] = 1;
-                    score = 0;
-                }
-                tries=0;
-                setTimeout(loadGame,moveOnDelay);
-            }
-            else {
-                setTimeout(bumpQuestion,moveOnDelay);
-                tries=0;
-            }
-        }
-        else {
-            e.style.background = "red";
-        }
-    }
-    else if(gameNum==2){
-        
-        console.log(tries + " tries")
-        if(lat<0 && e.innerHTML == "Southern"){
-            if(tries==1){score++;}
-            e.style.background = "green";
-            if(score>=game2["passing"]){
-                
-                gameNum++;
-                tries=0;
-                stopOther();
-                setTimeout(loadGame,moveOnDelay);
-                score = 0;
-            }
-            else{
-                
-                setTimeout(bumpQuestion,moveOnDelay);
-            }
-        }
-        else if(lat>0 && e.innerHTML == "Northern"){
-            if(tries==1){score++;}
-            e.style.background = "green";
-            if(score>=game2["passing"]){
-                
-                gameNum++;
-                tries=0;
-                stopOther();
-                setTimeout(loadGame,moveOnDelay);
-                score = 0;
-            }
-            setTimeout(bumpQuestion,moveOnDelay);
-        }
-        else if(lat==0 && e.innerHTML == "Neither"){
-            if(tries==1){score++;}
-            e.style.background = "green";
-            if(score>=game2["passing"]){
-                gameNum++;
-                tries=0;
-                stopOther();
-                setTimeout(loadGame,moveOnDelay);
-                score = 0;
-            }
-            setTimeout(bumpQuestion,moveOnDelay);
-        }
-        else{
-            e.style.background = "red";
-        }
-        postScore();
-    }
-    else if(gameNum==3){
-        if(path>0&&e.innerHTML=="Winter Solstice"){
-            if(tries==1){score++;}
-            e.style.background = "green";
-            setTimeout(bumpQuestion,moveOnDelay);
-        }
-        else if(path<0&&e.innerHTML == "Summer Solstice"){
-            if(tries==1){score++;}
-            e.style.background = "green";
-            setTimeout(bumpQuestion,moveOnDelay);
-        }
-        else if(path==0&&e.innerHTML == "Equinox"){
-            if(tries==1){score++;}
-            e.style.background = "green";
-            setTimeout(bumpQuestion,moveOnDelay);
-        }
-        else{
-            e.style.background = "red";
-        }
-        if(score==game3["passing"]){
-            gameNum++;
-            tries=0;
-            score = 0;
-            setTimeout(loadGame,moveOnDelay);
-        }
-        postScore();
-    }
-    else if(gameNum==4){
-        let answer = encodeURI(correctAnswer);
-        let test = encodeURI(e.innerHTML);
-        if(answer==test){
-            if(tries==1){
-                score++;
-                e.style.background = "green";
-                setTimeout(loadGame,moveOnDelay);
-            }
-            else{
-                e.style.background = "green";
-                setTimeout(loadGame,moveOnDelay);
-            }
-            if(score>=game4["passing"]){
-                tries=0;
-                gameNum++;
-                score = 0;
-                e.style.background = "green";
-                score = 0;
-                setTimeout(loadGame,moveOnDelay);
-            }
-            tries=0;
-            console.log(score);
-            console.log(tries);
-        }
-        else{
-            e.style.background = "red";
-        }
-        postScore();
-    }
-}
-
-function bumpQuestion(){
-    if(gameNum==1){
-        document.getElementById("question").innerHTML = game1[game1["currentQuestion"]]["question"];
-        loadButtons(colors);
-        postScore();
-    }
-    else if(gameNum==2){
-        loadButtons(hemispheres);
-        generateRandomLat();
-        drawDiagram(false);
-    }
-    else if(gameNum==3){
-        loadButtons(specialDays);
-        drawDiagram(true);
-        while(previousOffset == path){
-            path = Math.sin((Math.floor(Math.random()*3)+1)*Math.PI/2)*offsetRange;
-        }
-        if(path<1&&path>-1){path=0;}
-        previousOffset = path;
-        drawDayBasedOnOffset(path,equinoxColor);
-    }
-    else if(gameNum==4){
-        loadGame();
-    }
-    tries=0;
-}
-
-function postScore(){
-    document.getElementById("score").innerHTML = "";
-    for(var i = 0; i<score; i++){
-        document.getElementById("score").innerHTML += "&#11088;"
-    }
-}
-
-function postRequirements(){
-    document.getElementById("passing").innerHTML = "";
-    for(let i = 0; i<passing; i++){
-        document.getElementById("passing").innerHTML += "&#11088;"
-    }
-}
-
-function postGameNumber(){
-    document.getElementById("gameNumber").innerHTML = "Game Number " + gameNum;
-}
-
-loadButtons(colors);
-//animate();
+//loadButtons(colors);
