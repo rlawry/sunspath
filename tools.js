@@ -18,7 +18,7 @@ let lineW = 2;
 
 //global variables for game function
 
-var gameNum = 1;
+var gameNum = 4;
 var tries = 0;
 let score = 0;
 let passing = 0;
@@ -219,8 +219,10 @@ function loadGame(){
         drawDiagram(true);
         while(previousOffset == path){
             path = Math.sin((Math.floor(Math.random()*3)+1)*Math.PI/2)*offsetRange;
+            if(path<1&&path>-1){path=0;}
         }
         if(path<1&&path>-1){path=0;}
+        console.log("previous = " + previousOffset + " and new path: " + path);
         previousOffset = path;
         console.log(path + " path");
         drawDayBasedOnOffset(path,equinoxColor);
@@ -411,6 +413,7 @@ function check(e){
         postScore();
     }
 }
+
 
 function bumpQuestion(){
     if(gameNum==1){
@@ -733,7 +736,7 @@ function loadButtons(args){
 }
 
 function plopMonth(index){
-    console.log(months[index]);
+    //console.log(months[index]);
     document.getElementById("month").innerHTML = months[index];
 }
 
