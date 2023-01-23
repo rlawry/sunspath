@@ -48,7 +48,7 @@ var games = {
         },
         totalQuestions: 3,
         currentQuestion: 1,
-        background: "#110011",
+        background: "#330033",
         complete: false,
         passing: 3,
         score: 0
@@ -58,7 +58,7 @@ var games = {
         question: "What is the latitude of the observer?",
         score: 0,
         passing: 6,
-        background: "#111100",
+        background: "#333300",
         complete: false
     },
     
@@ -66,7 +66,7 @@ var games = {
         question: "In which hemisphere is the observer?  Watch the sun's path over the course of a year.",
         score: 0,
         passing: 6,
-        background: "#000011",
+        background: "#000033",
         complete: false
     },
     
@@ -74,7 +74,7 @@ var games = {
         question: "Which path is shown?",
         passing: 5,
         score:0,
-        background: "#001100",
+        background: "#003300",
         complete: false
     },
     
@@ -82,7 +82,7 @@ var games = {
         question: "What is the latitude of the observer?",
         passing: 5,
         score: 0,
-        background: "#111111",
+        background: "#333333",
         complete: false
     }
 }
