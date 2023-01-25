@@ -18,7 +18,7 @@ let lineW = 2;
 
 //global variables for game function
 
-var gameNum = 3;
+var gameNum = 1;
 var tries = 0;
 let score = 0;
 let passing = 0;
