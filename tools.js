@@ -18,7 +18,7 @@ let lineW = 2;
 
 //global variables for level function
 
-var levelNum = 3;
+var levelNum = 1;
 var tries = 0;
 let score = 0;
 let passing = 0;
