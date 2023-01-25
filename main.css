@@ -41,7 +41,7 @@ canvas{
     z-index: 3;
 }
 
-.game-panel{
+.level-panel{
     position: absolute;
     background: inherit;
     top: 65%;
@@ -129,7 +129,7 @@ canvas{
     background-color: inherit;
 }
 
-#gameNumber{
+#levelNumber{
     float: right;
 }
 
