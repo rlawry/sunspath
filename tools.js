@@ -300,7 +300,7 @@ function loadlevel(){
         animate();
         let list = ["-----","CATCH THE Summer Solstice!", "------"];
         loadButtons(list);
-        while(Math.abs(lat)<23.5 && Math.abs(lat)<66.5){
+        while(Math.abs(lat)<23.5 && Math.abs(lat)<60){
             lat = generateRandomLat();
         }
         drawDiagram(true);
@@ -315,7 +315,7 @@ function loadlevel(){
         animate();
         let list = ["-----","CATCH THE Winter Solstice!", "------"];
         loadButtons(list);
-        while(Math.abs(lat)<23.5 && Math.abs(lat)<66.5){
+        while(Math.abs(lat)<23.5 && Math.abs(lat)<60){
             lat = generateRandomLat();
         }
         drawDiagram(true);
@@ -324,6 +324,8 @@ function loadlevel(){
     }
     else if(levelNum==9){
         document.getElementById("question").innerHTML = "You did it!";
+        document.getElementById("option2").innerHTML = "You're a WINNER!";
+        document.getElementById("month").innerHTML = "WOW SO AWESOME!";
         date = new Date();
         animateAll();
     }
