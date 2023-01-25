@@ -240,6 +240,8 @@ function loadlevel(){
         animate();
     }
     else if(levelNum==4){                                                        //whole level at latitude 43.6
+        monthsActive = false;
+        document.getElementById("month").innerHTML = "Which path?";
         setQuestion();
         setPassing();
         postRequirements();
