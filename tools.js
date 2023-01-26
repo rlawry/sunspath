@@ -183,13 +183,15 @@ var monthsActive = false;
 function init(){
     //c.height = window.innerHeight;
     //c.width = window.innerWidth;
-    loadlevel(true);
+    newscreen = true;
+    loadlevel();
 }
 
 function resizeDiagram(){
     //c.height = window.innerHeight;
     //c.width = window.innerWidth;
-    loadlevel(false);
+    newscreen = false;
+    loadlevel();
 }
 
 window.addEventListener("resize",function(){
@@ -205,7 +207,7 @@ var clickAllowed = true;
 let falseAnswer1,falseAnswer2;
 let list = [];
 
-function loadlevel(newscreen){
+function loadlevel(){
     postScore();
     postlevelNumber();
     console.log(Object.keys(levels).length + " length and num " + levelNum);
@@ -354,6 +356,7 @@ function loadlevel(newscreen){
         drawDiagram(true);
 
     }
+    newscreen = true;
 }
 
 function setQuestion(){
