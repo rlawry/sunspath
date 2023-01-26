@@ -181,3 +181,11 @@ canvas{
     from{height: 40px}
     to{height:fit-content}
 }
+
+.revised{
+    position: absolute;
+    bottom: 5%;
+    right: 5%;
+    background: inherit;
+    color: white;
+}
