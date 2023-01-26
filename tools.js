@@ -65,7 +65,7 @@ var levels = {
     3 : {
         question: "In which hemisphere is the observer?  Watch the sun's path over the course of a year.",
         score: 0,
-        passing: 6,
+        passing: 4,
         background: "#000033",
         complete: false
     },
@@ -650,7 +650,7 @@ function postRequirements(){
 
 function postlevelNumber(){
     if(levelNum<6){document.getElementById("levelNumber").innerHTML = "Level Number " + levelNum;}
-    else{
+    else if(levelNum==9){
         document.getElementById("levelNumber").innerHTML = "All levels Complete";
     }
 }
