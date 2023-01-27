@@ -1,6 +1,9 @@
 const c = document.getElementById("canvas");
 const ctx = c.getContext("2d");
 
+var tmpCanvas = document.createElement('canvas'),
+tmpCtx = tmpCanvas.getContext('2d');
+
 //diagram variables
 
 let lat = -10;
@@ -18,7 +21,7 @@ let lineW = 2;
 
 //global variables for level function
 
-var levelNum = 1;
+var levelNum = 9;
 var tries = 0;
 let score = 0;
 let passing = 0;
@@ -72,7 +75,7 @@ var levels = {
     2 : {
         question: "What is the latitude of the observer?",
         score: 0,
-        passing: 6,
+        passing: 4,
         background: "#333300",
         complete: false
     },
@@ -181,8 +184,10 @@ var monthsActive = false;
 //get up and running
 
 function init(){
-    //c.height = window.innerHeight;
-    //c.width = window.innerWidth;
+    tmpCanvas.height = c.height;
+    tmpCtx.canvas.height = c.height;
+    tmpCanvas.width = c.width;
+    tmpCtx.canvas.width = c.width;
     newscreen = true;
     loadlevel();
 }
@@ -198,6 +203,10 @@ window.addEventListener("resize",function(){
     resizeDiagram();
 });
 
+window.addEventListener("mousemove", function(e){
+    if(levelNum==9){drawObserver(e.x,e.y);}
+});
+
 //level function
 
 let previousOffset = 0;
@@ -210,9 +219,7 @@ let list = [];
 function loadlevel(){
     postScore();
     postlevelNumber();
-    console.log(Object.keys(levels).length + " length and num " + levelNum);
     if(levelNum<levels.length+1){setPassing();}
-    console.log(passing + " passing");
     if(levelNum==1){
         document.getElementById("question").innerHTML = levels[levelNum][levels[levelNum]["currentQuestion"]]["question"];
         setPassing();
@@ -750,198 +757,203 @@ function generateRandomLat(){
 
 //drawing functions
 
-function drawDiagram(polaris){
-    drawScreen();
-    drawGround();
-    drawSky();
-    if(polaris){drawPolaris();}
-    drawBigIncrements();
-    drawSmallIncrements();
-    drawCompass();
-    drawObserver(c.width/2,3*c.height/4);
+function loadDiagram(polaris){
+    drawScreen(tmpCtx);
+    drawGround(tmpCtx);
+    drawSky(tmpCtx);
+    if(polaris){drawPolaris(tmpCtx);}
+    drawBigIncrements(tmpCtx);
+    drawSmallIncrements(tmpCtx);
+    drawCompass(tmpCtx);
+    drawObserver(tmpCtx,c.width/2,3*c.height/4);
+    ctx.drawImage(tmpCtx.canvas, 0, 0);
 }
 
-function drawScreen(){
-    ctx.fillStyle = levels[levelNum]["background"];
-    ctx.fillRect(0,0,c.width,c.height);
+function updateDiagram(polaris){
+
+}
+
+function drawScreen(cc){
+    cc.fillStyle = levels[levelNum]["background"];
+    cc.fillRect(0,0,c.width,c.height);
     document.body.style.background = levels[levelNum]["background"];
 }
 
-function drawGround(){
-    ctx.save();
-    ctx.beginPath();
-    ctx.lineWidth = 1;
-    ctx.fillStyle = "green";
-    ctx.strokeStyle = "green";
-    ctx.ellipse(c.width/2,3*c.height/4,200,40,0,2*Math.PI,false);
-    ctx.stroke();
-    ctx.fill();
-    ctx.closePath();
-    ctx.restore();
+function drawGround(cc){
+    cc.save();
+    cc.beginPath();
+    cc.lineWidth = 1;
+    cc.fillStyle = "green";
+    cc.strokeStyle = "green";
+    cc.ellipse(c.width/2,3*c.height/4,200,40,0,2*Math.PI,false);
+    cc.stroke();
+    cc.fill();
+    cc.closePath();
+    cc.restore();
 }
 
-function drawSky(){
-    ctx.save();
-    ctx.beginPath();
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "skyblue";
-    ctx.arc(c.width/2,3*c.height/4,200,0,Math.PI,true);
-    ctx.stroke();
-    ctx.restore();
+function drawSky(cc){
+    cc.save();
+    cc.beginPath();
+    cc.lineWidth = 1;
+    cc.strokeStyle = "skyblue";
+    cc.arc(c.width/2,3*c.height/4,200,0,Math.PI,true);
+    cc.stroke();
+    cc.restore();
 }
 
-function drawPolaris(){
-    ctx.beginPath();
-    ctx.save();
-    ctx.strokeStyle = "yellow";
-    ctx.setLineDash([5,3]);
-    ctx.translate(c.width/2,3*c.height/4);
-    ctx.moveTo(0,0);
-    ctx.rotate(-1*lat*Math.PI/180);
-    ctx.lineTo(300,0);
-    ctx.stroke();
-    ctx.setLineDash([]);
+function drawPolaris(cc){
+    cc.beginPath();
+    cc.save();
+    cc.strokeStyle = "yellow";
+    cc.setLineDash([5,3]);
+    cc.translate(c.width/2,3*c.height/4);
+    cc.moveTo(0,0);
+    cc.rotate(-1*lat*Math.PI/180);
+    cc.lineTo(300,0);
+    cc.stroke();
+    cc.setLineDash([]);
     drawStar(300,0,5,10,3);
-    ctx.restore();
+    cc.restore();
 }
 
-function drawObserver(x,y){
-    ctx.save();
-    ctx.translate(window.width-x,y);
-    ctx.strokeStyle = "black";
-    ctx.fillStyle = "black";
-    ctx.beginPath();
-    ctx.moveTo(5,0);
-    ctx.lineTo(0,-5);       //leg 1
-    ctx.stroke();
-    ctx.lineTo(-5,0);       //leg 2
-    ctx.stroke();
-    ctx.moveTo(0,-5);       //top of legs
-    ctx.lineTo(0,-10);      //body
-    ctx.stroke();
-    ctx.lineTo(5,-10);      //arm1
-    ctx.stroke();
-    ctx.moveTo(0,-10);      
-    ctx.lineTo(-5,-10);     //arm2
-    ctx.stroke();
-    ctx.closePath();
-    ctx.beginPath();
-    ctx.arc(0,-15,4,0,2*Math.PI);
-    ctx.closePath();
-    ctx.stroke();
-    ctx.fill();
-    ctx.restore();
+function drawObserver(cc,x,y){
+    cc.save();
+    cc.translate(x,y);
+    cc.strokeStyle = "black";
+    cc.fillStyle = "black";
+    cc.beginPath();
+    cc.moveTo(5,0);
+    cc.lineTo(0,-5);       //leg 1
+    cc.stroke();
+    cc.lineTo(-5,0);       //leg 2
+    cc.stroke();
+    cc.moveTo(0,-5);       //top of legs
+    cc.lineTo(0,-10);      //body
+    cc.stroke();
+    cc.lineTo(5,-10);      //arm1
+    cc.stroke();
+    cc.moveTo(0,-10);      
+    cc.lineTo(-5,-10);     //arm2
+    cc.stroke();
+    cc.closePath();
+    cc.beginPath();
+    cc.arc(0,-15,4,0,2*Math.PI);
+    cc.closePath();
+    cc.stroke();
+    cc.fill();
+    cc.restore();
 }
 
-function drawStar(cx, cy, spikes, outerRadius, innerRadius) {
+function drawStar(cc, cx, cy, spikes, outerRadius, innerRadius) {
     var rot = Math.PI / 2 * 3;
     var x = cx;
     var y = cy;
     var step = Math.PI / spikes;
-    ctx.strokeSyle = "#000";
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - outerRadius)
+    cc.strokeSyle = "#000";
+    cc.beginPath();
+    cc.moveTo(cx, cy - outerRadius)
     for (i = 0; i < spikes; i++) {
         x = cx + Math.cos(rot) * outerRadius;
         y = cy + Math.sin(rot) * outerRadius;
-        ctx.lineTo(x, y)
+        cc.lineTo(x, y)
         rot += step
         x = cx + Math.cos(rot) * innerRadius;
         y = cy + Math.sin(rot) * innerRadius;
-        ctx.lineTo(x, y)
+        cc.lineTo(x, y)
         rot += step
     }
-    ctx.lineTo(cx, cy - outerRadius)
-    ctx.closePath();
-    ctx.lineWidth=2;
-    ctx.strokeStyle='yellow';
-    ctx.stroke();
-    ctx.fillStyle='white';
-    ctx.fill();
+    cc.lineTo(cx, cy - outerRadius)
+    cc.closePath();
+    cc.lineWidth=2;
+    cc.strokeStyle='yellow';
+    cc.stroke();
+    cc.fillStyle='white';
+    cc.fill();
 }
 
-function drawCompass(){
-    ctx.save();
-    ctx.translate(c.width/2,3*c.height/4);
-    ctx.lineWidth = 2;
-    ctx.font = "20px Arial";
-    ctx.fillStyle = "pink";
-    ctx.textAlign="center";
-    ctx.textBaseline="middle";
+function drawCompass(cc){
+    cc.save();
+    cc.translate(c.width/2,3*c.height/4);
+    cc.lineWidth = 2;
+    cc.font = "20px Arial";
+    cc.fillStyle = "pink";
+    cc.textAlign="center";
+    cc.textBaseline="middle";
     if(lat==90){
-        ctx.fillText("S",300,0);
-        ctx.fillText("S",-300,0);
+        cc.fillText("S",300,0);
+        cc.fillText("S",-300,0);
     }
     else if(lat==-90){
-        ctx.fillText("N",300,0);
-        ctx.fillText("N",-300,0);
+        cc.fillText("N",300,0);
+        cc.fillText("N",-300,0);
     }
     else {
-        ctx.fillText("N",300,0);
-        ctx.fillText("S",-300,0);
+        cc.fillText("N",300,0);
+        cc.fillText("S",-300,0);
     }
-    ctx.strokeStyle="pink";
-    ctx.moveTo(200,0);
-    ctx.lineTo(-200,0);
-    ctx.stroke();
-    ctx.moveTo(0,40);
-    ctx.lineTo(0,-40);
-    ctx.stroke();
-    ctx.restore();
+    cc.strokeStyle="pink";
+    cc.moveTo(200,0);
+    cc.lineTo(-200,0);
+    cc.stroke();
+    cc.moveTo(0,40);
+    cc.lineTo(0,-40);
+    cc.stroke();
+    cc.restore();
 }
 
-function drawBigIncrements(){
+function drawBigIncrements(cc){
     let angle;
-    ctx.save();
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "white";
-    ctx.translate(c.width/2,3*c.height/4);
-    ctx.font = "20px Arial";
-    ctx.fillStyle = "white";
-    ctx.textAlign="center";
-    ctx.textBaseline="middle";
+    cc.save();
+    cc.lineWidth = 1;
+    cc.strokeStyle = "white";
+    cc.translate(c.width/2,3*c.height/4);
+    cc.font = "20px Arial";
+    cc.fillStyle = "white";
+    cc.textAlign="center";
+    cc.textBaseline="middle";
     for(var i = 0; i<=18; i+=1){
-        ctx.beginPath();  
-        ctx.moveTo(200,0);
-        ctx.lineTo(210,0);
-        ctx.stroke();
+        cc.beginPath();  
+        cc.moveTo(200,0);
+        cc.lineTo(210,0);
+        cc.stroke();
         angle = i*10;
         if(angle<=90){
-            ctx.save();
-            ctx.translate(235,0);
-            ctx.rotate(i*Math.PI/18);
-            ctx.fillText(`${angle}°`,0,0);
-            ctx.restore();
+            cc.save();
+            cc.translate(235,0);
+            cc.rotate(i*Math.PI/18);
+            cc.fillText(`${angle}°`,0,0);
+            cc.restore();
         }
         else{
-            ctx.save();
-            ctx.translate(235,0);
-            ctx.rotate(i*Math.PI/18);
-            ctx.fillText(`${180-angle}°`,0,0);
-            ctx.restore();
+            cc.save();
+            cc.translate(235,0);
+            cc.rotate(i*Math.PI/18);
+            cc.fillText(`${180-angle}°`,0,0);
+            cc.restore();
         }
-        ctx.rotate(-1*Math.PI/18);    
+        cc.rotate(-1*Math.PI/18);    
     }
-    ctx.restore();
+    cc.restore();
 }
 
-function drawSmallIncrements(){
-    ctx.save();
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "white";
-    ctx.translate(c.width/2,3*c.height/4);
-    ctx.rotate(-1*Math.PI/180);
+function drawSmallIncrements(cc){
+    cc.save();
+    cc.lineWidth = 1;
+    cc.strokeStyle = "white";
+    cc.translate(c.width/2,3*c.height/4);
+    cc.rotate(-1*Math.PI/180);
     for(var j = 0; j<18; j+=1){
         for(var i = 0; i<9; i+=1){
-            ctx.beginPath();  
-            ctx.moveTo(200,0);
-            ctx.lineTo(205,0);
-            ctx.stroke();
-            ctx.rotate(-1*Math.PI/180);
+            cc.beginPath();  
+            cc.moveTo(200,0);
+            cc.lineTo(205,0);
+            cc.stroke();
+            cc.rotate(-1*Math.PI/180);
         }
-        ctx.rotate(-1*Math.PI/180);
+        cc.rotate(-1*Math.PI/180);
     }
-    ctx.restore();
+    cc.restore();
 }
 
 //big path of sun math and drawing - arcs based on "offset"
