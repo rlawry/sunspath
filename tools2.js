@@ -23,7 +23,7 @@ let lineW = 2;
 
 //global variables for level function
 
-var levelNum = 9;
+var levelNum = 1;
 var tries = 0;
 let score = 0;
 let passing = 0;
@@ -188,11 +188,9 @@ var monthsActive = false;
 function init(){
     tmpCanvas.height = c.height;
     tmpCtx.canvas.height = c.height;
-    console.log(tmpCanvas.height + " tmpCanvas.height");
     tmpCanvas.width = c.width;
     tmpCtx.canvas.width = c.width;
     rect = document.getElementById("canvas").getBoundingClientRect();
-    console.log(rect.left + " rect left + rect top" + rect.top);
     newscreen = true;
     loadLevelDiagram();
     loadlevel();
@@ -209,15 +207,34 @@ window.addEventListener("resize",function(){
     resizeDiagram();
 });
 
+var funny = 1;
+var rot = 0;
+var grow = true;
+
 window.addEventListener("mousemove", function(e){
-    if(levelNum==9){drawObserver(tmpCtx,e.x-rect.left,e.y-rect.top);}
+    if(levelNum==9){
+        if(grow){
+            if(funny<10){
+                funny += 0.01;
+            }
+            else{grow = false;}
+        }
+        else{
+            if(funny>0.1){
+                funny -=0.01;
+            }
+            else{grow = true;}
+        }
+        rot += 0.09;
+        drawObserver(tmpCtx,e.x-rect.left,e.y-rect.top,funny, rot);
+    }
     //console.log(e.x + " e.x " + e.y + " e.y" )
 });
 
 //level function
 
-let previousOffset = 0;
-let path = 0;
+let previousOffset = 5;
+let path = 5;
 
 
 var date;
@@ -290,12 +307,14 @@ function loadlevel(){
         loadButtons(specialDays);
         lat = 43.6;
         updateDiagram(true);
+        console.log("before " + previousOffset + " previous and path " + path);
         if(newscreen){
             while(previousOffset == path){
                 path = Math.sin((Math.floor(Math.random()*3)+1)*Math.PI/2)*offsetRange;
                 if(path<1&&path>-1){path=0;}
             }
         }
+        console.log("after " + previousOffset + " previous and path " + path);
         if(path<1&&path>-1){path=0;}
         previousOffset = path;
         drawDayBasedOnOffset(path,equinoxColor);
@@ -308,6 +327,7 @@ function loadlevel(){
         if(newscreen){list = loadThreeList();}
         loadButtons(list);
         updateDiagram(false);
+        console.log("loaded update");
         if(lat>0){
             drawDayBasedOnOffset(summerSolsticeOffset,summerColor);
             document.getElementById("month").innerHTML = "June";
@@ -320,6 +340,7 @@ function loadlevel(){
             drawDayBasedOnOffset(equinoxOffset,equinoxColor);
             document.getElementById("month").innerHTML = "March/September";
         }
+        console.log("loaded drawn");
     }
     else if(levelNum==6){
         monthsActive = false;
@@ -342,9 +363,7 @@ function loadlevel(){
         animate();
         list = ["-----","CATCH THE Summer Solstice!", "------"];
         loadButtons(list);
-        while(Math.abs(lat)<23.5 && Math.abs(lat)<60){
-            lat = generateRandomLat();
-        }
+        lat = generateLatBtwn(30,60);
         updateDiagram(true);
         drawDayBasedOnOffset(equinoxOffset,equinoxColor);
         document.getElementById("month").innerHTML = "Catch the Summer Solstice!";
@@ -357,9 +376,7 @@ function loadlevel(){
         animate();
         list = ["-----","CATCH THE Winter Solstice!", "------"];
         loadButtons(list);
-        while(Math.abs(lat)<23.5 && Math.abs(lat)<60){
-            lat = generateRandomLat();
-        }
+        lat = generateLatBtwn(30,60);
         updateDiagram(true);
         drawDayBasedOnOffset(equinoxOffset,equinoxColor);
         document.getElementById("month").innerHTML = "Catch the Winter Solstice!";
@@ -405,8 +422,6 @@ var currentClick = 0;
 
 function check(e){
     currentClick = Date.now();
-    console.log(currentClick + " curr + last " + lastClick);
-    console.log(e.id);
     if(currentClick >= lastClick + 1000){ 
         lastClick = currentClick;
         clickAllowed = false;    
@@ -539,10 +554,10 @@ function check(e){
                 if(score>=passing){
                     nextLevel();
                 }
-                setTimeout(loadlevel,moveOnDelay);
                 e.style.background = "green";
                 playRight();
                 tries=0;
+                setTimeout(loadlevel,moveOnDelay);
             }
             else{
                 wrong(e);
@@ -553,8 +568,10 @@ function check(e){
         else if(levelNum==6){
             //console.log(currentOffset + " cO");
             if(e.id == "option2"){
-                if(currentOffset < 3 && currentOffset > -3){
+                if(currentOffset < 5 && currentOffset > -5){
                     stopOther();
+                    updateDiagram(false);
+                    drawDayBasedOnOffset(equinoxOffset,equinoxColor);
                     score++;
                     if(score == passing){
                         nextLevel();
@@ -592,6 +609,7 @@ function check(e){
                         document.getElementById("option2").style.background = "green";
                         playRight();
                         setTimeout(loadlevel,moveOnDelay);
+                        lat = generateLatBtwn(30,60);
                     }
                     else{
                         wrong(e);
@@ -610,6 +628,7 @@ function check(e){
                         document.getElementById("option2").style.background = "green";
                         playRight();
                         setTimeout(loadlevel,moveOnDelay);
+                        lat = generateLatBtwn(30,60);
                     }
                     else{
                         wrong(e);
@@ -634,6 +653,7 @@ function check(e){
                         document.getElementById("option2").style.background = "green";
                         playRight();
                         setTimeout(loadlevel,moveOnDelay);
+                        lat = generateLatBtwn(30,60);
                     }
                     else{
                         wrong(e);
@@ -652,6 +672,7 @@ function check(e){
                         document.getElementById("option2").style.background = "green";
                         playRight();
                         setTimeout(loadlevel,moveOnDelay);
+                        lat = generateLatBtwn(30,60);
                     }
                     else{
                         wrong(e);
@@ -719,10 +740,10 @@ function postRequirements(){
 }
 
 function postlevelNumber(){
-    if(levelNum<6){document.getElementById("levelNumber").innerHTML = "Level Number " + levelNum;}
-    else if(levelNum==9){
+    if(levelNum==9){
         document.getElementById("levelNumber").innerHTML = "All levels Complete";
     }
+    else{document.getElementById("levelNumber").innerHTML = "Level Number " + levelNum;}
 }
 
 function loadThreeList(){                                                                   //pick the answer index of the latitude list then load a list with the other two items.
@@ -774,6 +795,11 @@ function generateRandomLat(){
     return Math.floor(Math.random()*90) * sign;
 }
 
+function generateLatBtwn(min,max){
+    let sign = Math.random() < 0.5 ? -1 : 1;
+    return sign*Math.floor(Math.random()*(max-min)+min);
+}
+
 //drawing functions
 
 //initial load at the start of a level draws everything except polaris, compass and path.
@@ -788,8 +814,6 @@ function loadLevelDiagram(){
     drawSky(tmpCtx);
     drawBigIncrements(tmpCtx);
     drawSmallIncrements(tmpCtx);
-    drawObserver(tmpCtx,tmpCanvas.width/2,3*tmpCanvas.height/4);
-    console.log(tmpCanvas.height + " canvas height");
 }
 
 //pulls from the temp canvas the diagram and adds in the compass
@@ -797,12 +821,12 @@ function updateDiagram(polaris){
     ctx.drawImage(tmpCtx.canvas, 0, 0);   // first layer posts the drawing to live canvas
     if(polaris){drawPolaris(ctx);}
     drawCompass(ctx);
+    drawObserver(ctx,c.width/2,3*c.height/4,1,0);
+    console.log("updateDiagram");
 }
 
 function drawScreen(cc){
     cc.fillStyle = levels[levelNum]["background"];
-    console.log(cc.canvas.fillStyle + "fillstyle");
-    console.log(cc.canvas.width + " cc.width and " + ctx.width + " ctx.width");
     cc.fillRect(0,0,cc.canvas.width,cc.canvas.height);
     document.body.style.background = levels[levelNum]["background"];
 }
@@ -845,29 +869,31 @@ function drawPolaris(cc){
     cc.restore();
 }
 
-function drawObserver(cc,x,y){
+function drawObserver(cc,x,y,scale, rotation){
     cc.save();
     cc.translate(x,y);
+    cc.rotate(rotation);
     cc.strokeStyle = "black";
-    cc.fillStyle = "black";
+    cc.fillStyle = "white";
     cc.beginPath();
-    cc.moveTo(5,0);
-    cc.lineTo(0,-5);       //leg 1
+    cc.moveTo(5*scale,0);
+    cc.lineTo(0,-5*scale);       //leg 1
     cc.stroke();
-    cc.lineTo(-5,0);       //leg 2
+    cc.lineTo(-5*scale,0);       //leg 2
     cc.stroke();
-    cc.moveTo(0,-5);       //top of legs
-    cc.lineTo(0,-10);      //body
+    cc.moveTo(0,-5*scale);       //top of legs
+    cc.lineTo(0,-10*scale);      //body
     cc.stroke();
-    cc.lineTo(5,-10);      //arm1
+    cc.lineTo(5*scale,-10*scale);      //arm1
     cc.stroke();
-    cc.moveTo(0,-10);      
-    cc.lineTo(-5,-10);     //arm2
+    cc.moveTo(0,-10*scale);      
+    cc.lineTo(-5*scale,-10*scale);     //arm2
     cc.stroke();
     cc.closePath();
     cc.beginPath();
-    cc.arc(0,-15,4,0,2*Math.PI);
+    cc.arc(0,-15*scale,4*scale,0,2*Math.PI);
     cc.closePath();
+    
     cc.stroke();
     cc.fill();
     cc.restore();
@@ -904,6 +930,7 @@ function drawStar(cc, cx, cy, spikes, outerRadius, innerRadius) {
 
 function drawCompass(cc){
     cc.save();
+    cc.beginPath();
     cc.translate(c.width/2,3*c.height/4);
     cc.lineWidth = 2;
     cc.font = "20px Arial";
@@ -1036,7 +1063,6 @@ function drawDayBasedOnOffset(offsetSelect, col){
     ctx.ellipse(0,0,newDiameter,Math.abs(40*Math.cos(rad(angle)))*scale40,0,rad(startAngle),rad(endAngle),false);
     
     ctx.stroke();
-    ctx.closePath();
     ctx.restore();
 }
 
@@ -1153,7 +1179,6 @@ function loop(now) {
     drawDayBasedOnOffset(equinoxOffset,equinoxColor);
     if(lat>-90){drawDayBasedOnOffset(summerSolsticeOffset,summerColor);}
     if(lat<90){drawDayBasedOnOffset(winterSolsticeOffset,winterColor);}
-
     animateAll();
 }
 
@@ -1173,8 +1198,6 @@ function stop() {
 }
 
 var buttons = document.querySelectorAll(".button");
-console.log(buttons);
 buttons.forEach(btn => {
     btn.addEventListener('click', function(){check(this)}, false);
-    console.log("loaded");
 });
