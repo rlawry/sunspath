@@ -23,7 +23,7 @@ let lineW = 2;
 
 //global variables for level function
 
-var levelNum = 3;
+var levelNum = 1;
 var tries = 0;
 let score = 0;
 let passing = 0;
@@ -118,21 +118,21 @@ var levels = {
 
     6: {
         question: "Catch the sun when its path is an equinox!",
-        passing: 3,
+        passing: 2,
         score: 0,
         background: "#330033"
     },
 
     7: {
         question: "Catch the Summer Solstice!",
-        passing: 3,
+        passing: 2,
         score: 0,
         background: "#223344"
     },
 
     8: {
         question: "Catch the Winter Solstice!",
-        passing: 3,
+        passing: 2,
         score: 0,
         background: "#443322"
     },
