@@ -23,7 +23,7 @@ let lineW = 2;
 
 //global variables for level function
 
-var levelNum = 1;
+var levelNum = 3;
 var tries = 0;
 let score = 0;
 let passing = 0;
@@ -49,6 +49,16 @@ gameOver.load();
 let right = new Audio("yes.mp3");
 right.preload = 'auto';
 right.load();
+
+//
+//  Game topics:
+//  1. Latitude Based
+//  2. Month and Season Based
+//  3. Sunrise and Sunset Based
+//  4. Time of Day Based
+//  5. Direct Ray
+//  6. Length of Day
+//  7. Shadow
 
 //level specific details
 var levels = {
@@ -308,14 +318,17 @@ function loadlevel(){
         lat = 43.6;
         updateDiagram(true);
         console.log("before " + previousOffset + " previous and path " + path);
+        console.log(newscreen);
         if(newscreen){
             while(previousOffset == path){
-                path = Math.sin((Math.floor(Math.random()*3)+1)*Math.PI/2)*offsetRange;
-                if(path<1&&path>-1){path=0;}
+                let sign = Math.random() < 0.5 ? -1 : 1;
+                let option = Math.random() < 0.5 ? 0 : offsetRange;
+                console.log(sign + " * " + offsetRange);
+                path = sign * option;
             }
         }
         console.log("after " + previousOffset + " previous and path " + path);
-        if(path<1&&path>-1){path=0;}
+        if(path<=1&&path>=-1){path=0;}
         previousOffset = path;
         drawDayBasedOnOffset(path,equinoxColor);
     }
@@ -712,6 +725,8 @@ function nextLevel(){
     levelNum++;
     score = 0;
     levelUp.play();
+    previousOffset = path;
+    loadLevelDiagram();
 }
 
 function bumpQuestion(){
